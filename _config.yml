@@ -31,7 +31,7 @@ github_username:  machinexa2
 
 
 # Build settings
-theme: minima
+# theme: minima
 plugins:
   - jekyll-feed
 
