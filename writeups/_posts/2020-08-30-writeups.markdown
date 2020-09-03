@@ -1,7 +1,0 @@
----
-layout: post
-title:  "CTF Writeups"
-date:   2020-08-30 16:25:10 +0545
-category: Writeups
----
-My first writeup
