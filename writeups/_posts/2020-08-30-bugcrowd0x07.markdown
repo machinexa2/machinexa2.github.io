@@ -109,5 +109,37 @@ agent_1337
 Here's our dear flag `FLAG{f0dee25f617e2cb820b9b44fcdf90ed8}`.
 
 # Flag 6
-It was insanely difficult to get this flag. Nmap shows port 3389 as closed. Now, i was stuck. Again going to official bugcrowd discord server, i found that we have to do port knocking. The random numbers were port numbers, all of them were closed. For those who dont know what port knocking is:    
-`"In computer networking, port knocking is a method of externally opening ports on a firewall by generating a connection attempt on a set of prespecified closed ports. Once a correct sequence of connection attempts is received, the firewall rules are dynamically modified to allow the host which sent the connection attempts to connect over specific port(s)"`
+It was insanely difficult to get this flag. Nmap shows port 3389 as closed. Now, i was stuck. Again, going to official bugcrowd discord server, i found that we have to do port knocking. The random numbers were port numbers, all of them were closed. For those who dont know what port knocking is:    
+<br>
+`"In computer networking, port knocking is a method of externally opening ports on a firewall by generating a connection attempt on a set of prespecified closed ports. Once a correct sequence of connection attempts is received, the firewall rules are dynamically modified to allow the host which sent the connection attempts to connect over specific port(s)"`  
+<br>
+I soon developed a python3 script that automates this job using itertools. I initally used **knock** for port knocking but it didnt work. That was frustating, soon i used nc for port knocking and that didnt work too. That was more frustating. Finally i used nmap and script looked something like this
+```python
+root@kali-linux:~/tmp/CTF/Bugcrowd0x07 cat PortKnocker.py 
+from itertools import permutations 
+import os
+
+ports = [1337,415,2099,921,3389]
+permutations_object = permutations(ports)
+permutations_list = list(permutations_object)
+
+def port_knock():
+    try:
+        for x in range(0,120):
+            print(permutations_list[x])
+            os.system('nmap -p {},{},{},{},{} 07.levelupctf.com'.format(permutations_list[x][0], permutations_list[x][1], permutations_list[x][2],permutations_list[x][3], permutations_list[x][4]))
+    except Exception as E:
+	print(E)
+port_knock()
+```
+<br>
+The script worked fine and it opened the port. Yay! I initially mistaked that port for **RDP** and tried to connect through **RDP protocol** but it didnt work. Later, i visited in browser and it worked like charm. However, there was no console :(. Dirbusting a bit got me `/console` endpoint which had python3 interactive interpreter. It was the **Werkzeug debug console**.
+
+![Werkzeug console](/writeups/assets/images/bugcrowd0x07_werkzeug.png)
+  
+I looked at source code, js files and urls. There was a secret variable exposed in javascript file but i couldnt use it. Doing **searchsploit** showed me Werkzeug console had an exploit. The metasploit exploit didnt work for some reasons so i opted for custom exploit. I got a shell after using that exploit and got another flag `FLAG{022d8a7a561a02c371fd7c5ec3e5ea06}`
+
+# Flag 7
+Flag 7 was very easy. There were credentials in `/opt/credentials` and i logged in using that creds. There was a button to destroy the WannaSpy spyware and i did it. I defeated *The Matriarch* and got 7th flag.
+
+![The Matriarch](/writeups/assets/images/bugcrowd0x07_matriarch.png)
