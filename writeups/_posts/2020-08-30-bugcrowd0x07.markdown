@@ -72,6 +72,10 @@ Nothing interesting except those usernames. I tried using all those usernames in
 **2) Whats your favourite hobby?**  
 I was stuck at this point and looking at discussion in discord and talking with some friends, i got hint to OSINT by geolocation. I used googlemaps for this purpose and got a zoo name **San Francisco Zoo**. 
 
-![Encrypted Chat](/writeups/assets/images/bugcrowd0x07_googlemaps_osint.png)
+![Googlemap OSINT](/writeups/assets/images/bugcrowd0x07_googlemaps_osint.png)
 
 Searching their twitter page, website and other social media, i got nothing. I was trying to bruteforce lion names. After spending lot of hours on OSINT, i simply decided to search SF Zoo Lion name and got answer Jahari. I logged in using password the reset page provided. However, there was no flag. At start i said that `/radio` endpoint caused redirection to `/login` probably due to fact we weren't logged in. Visiting the endpoint `/radio` give me flag as well as message that there is something hidden inside agent images.
+
+![Radio Endpoint](/writeups/assets/images/bugcrowd0x07_radio_endpoint.png)
+
+The exfiltration of data through ping is useless. However, i got the password **pwn4llthebugz** as well as flag `FLAG{f0dee25f617e2cb820b9b44fcdf90ed8}`
