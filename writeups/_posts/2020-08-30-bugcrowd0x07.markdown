@@ -10,7 +10,7 @@ category: Writeups
 I started playing this CTF and thought that i couldn't complete, but still tried. The url given was [https://07.levelupctf.com/radio](https://07.levelupctf.com/radio) and description says we are an **Agent** in top secret operation: Hack Another Day. The CTF had 7 flags in total.
 
 # Flag 1
-Visiting the url, browser gets redirected to `/login`. After trying basic SQLi payloads and default credentials, i start to look at JS files for potential attack vector. I use my custom made tool *JScanner* to extract sensitive info and we get `FLAG{504e8256b8a208845fe18a77e7b304b7}` in comment as well as new url.
+Visiting the url, browser gets redirected to `/login`. After trying basic SQLi payloads and default credentials, i start to look at JS files for potential attack vector. I use my custom made tool *JScanner* to extract sensitive info and i get `FLAG{504e8256b8a208845fe18a77e7b304b7}` in comment as well as new url.
 
 # Flag 2
 I downloaded an apk from that url. Since i never did apk decompiling and static code analysis it was going to be hard. For some reasons, i dont like java, still somehow i had mindset to complete the CTF. Using apktool i decompiled the apk file. 
@@ -48,4 +48,22 @@ Binary file resources/classes.dex matches
 resources/res/values/strings.xml:    <string name="encrypted_chat_key">8b0955d2682eb74347b9e71ea0558c67</string>
 resources/res/values/public.xml:    <public type="string" name="encrypted_chat_key" id="2131492892" />
 ```
-So, now we have header and key, we can
+<br>
+Having header and key, i visited the url and got chat which looks obsfucated. Hmm, nice giraffe.
+
+![Encrypted Chat](/writeups/assets/images/bugcrowd0x07_encrypted_chat.png)
+
+We get the flag `FLAG{e8606532b027bfd324ea31d1b4f116c2}` by looking at the exif metadata of giraffe picture.
+
+# Flag 4
+My intuition says that either its `ROT13` or `ROT47` and it turned out to be ciphertext of ROT13.
+After, decrypting, we get this: 
+```
+agent_nova: meow
+agent_tal: MESSAGE_DELETED
+agent_d5: Have you got word on our new mission yet
+agent_55: yeah we do, check the "mission list". they caught some HACK Agent as well
+agent_d5: thats crazy, anyways check out this dope giraffe i saw at the zoo the other day
+agent_55: hahahaha thats awesome
+```
+
