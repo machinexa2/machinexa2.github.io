@@ -146,6 +146,6 @@ Flag 7 was very easy. There were credentials in `/opt/credentials` and i logged 
 
 <br>
 <br>
-#### P.S. 
+# P.S. 
 The challenge was fun and i never thought i could complete that challenge still i tried. The euphoria from completing the CTF was greater than morphine shots.. My friends Naina, Atik-Rahman and others helped me in this CTF.  
 Overall, Bugcrowd did a awesome job in developing the CTF. I submitted writeup of the challenge near 12 pm. I stood 9th and got **3 month pentesterlab subscription** and **bugcrowd tshirt**.
