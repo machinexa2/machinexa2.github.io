@@ -74,8 +74,40 @@ I was stuck at this point and looking at discussion in discord and talking with 
 
 ![Googlemap OSINT](/writeups/assets/images/bugcrowd0x07_googlemaps_osint.png)
 
-Searching their twitter page, website and other social media, i got nothing. I was trying to bruteforce lion names. After spending lot of hours on OSINT, i simply decided to search SF Zoo Lion name and got answer Jahari. I logged in using password the reset page provided. However, there was no flag. At start i said that `/radio` endpoint caused redirection to `/login` probably due to fact we weren't logged in. Visiting the endpoint `/radio` give me flag as well as message that there is something hidden inside agent images.
+Searching their twitter page, website and other social media, i got nothing. I was trying to bruteforce lion names. After spending lot of hours on OSINT, i simply decided to search SF Zoo Lion name and got answer Jahari. I logged in using password the reset page provided and got a dashboard with target list. However, there was no flag. At start i said that `/radio` endpoint caused redirection to `/login` probably due to fact we weren't logged in. Visiting the endpoint `/radio` give me flag as well as message that there is something hidden inside agent images.
 
 ![Radio Endpoint](/writeups/assets/images/bugcrowd0x07_radio_endpoint.png)
 
 The exfiltration of data through ping is useless. However, i got the password **pwn4llthebugz** as well as flag `FLAG{f0dee25f617e2cb820b9b44fcdf90ed8}`
+
+# Flag 5
+There were 9 images and i tried different steganography techniques and tools. Manually viewing the image shows random numbers inside of pics. I got 3 random numbers: 1337,2099,921. One of my friend showed through changing image temperature that there is another number 415 inside one image. 
+
+![Temperature Changed](/writeups/assets/images/bugcrowd0x07_color_temperature.png)
+
+I wonder whats the use of those numbers.Also, binwalk showed that some data are embedded inside it.
+
+![Binwalk Image](/writeups/assets/images/bugcrowd0x07_binwalk.png)
+
+Trying to extract all data from **binwalk**, recursively for all files with more data embedded inside them, it was a tough job. However, there was nothing and i wasted my precious 1-2 hours. Soon, i tried bruteforcing as images were in format *agent1.jpg*,*agent2.jpg*,... I found out there was a picture called *agent87.jpg*. Using **Steghide** with password **pwn4llthebugz** extracted a file called console.txt with the following data in it.
+```
+root@kali-linux:~/tmp/CTF/Bugcrowd0x07/targets/other_agents# cat console.txt 
+Dear agent_521bcd5,
+
+As ordered by Matriarch, I have created a backdoor console that will allow us to launch WannaSpy when time is right.
+
+We're not worried about anyone getting in since they have to go through many doors to actually get in.
+
+Once you are ready, you will find that the console lives on 3389.
+
+FLAG{f0dee25f617e2cb820b9b44fcdf90ed8}
+
+Regards
+agent_1337
+```
+<br>
+Here's our dear flag `FLAG{f0dee25f617e2cb820b9b44fcdf90ed8}`.
+
+# Flag 6
+It was insanely difficult to get this flag. Nmap shows port 3389 as closed. Now, i was stuck. Again going to official bugcrowd discord server, i found that we have to do port knocking. The random numbers were port numbers, all of them were closed. For those who dont know what port knocking is:    
+`"In computer networking, port knocking is a method of externally opening ports on a firewall by generating a connection attempt on a set of prespecified closed ports. Once a correct sequence of connection attempts is received, the firewall rules are dynamically modified to allow the host which sent the connection attempts to connect over specific port(s)"`
