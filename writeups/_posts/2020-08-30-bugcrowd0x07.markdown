@@ -53,17 +53,25 @@ Having header and key, i visited the url and got chat which looks obsfucated. Hm
 
 ![Encrypted Chat](/writeups/assets/images/bugcrowd0x07_encrypted_chat.png)
 
-We get the flag `FLAG{e8606532b027bfd324ea31d1b4f116c2}` by looking at the exif metadata of giraffe picture.
+We get the flag `FLAG{e8606532b027bfd324ea31d1b4f116c2}` and geolocation data **37°43'58.5"N 122°30'08.5"W** by looking at the exif metadata of giraffe picture.
 
 # Flag 4
 My intuition says that either its `ROT13` or `ROT47` and it turned out to be ciphertext of ROT13.
 After, decrypting, we get this: 
 ```
 agent_nova: meow
-agent_tal: MESSAGE_DELETED
-agent_d5: Have you got word on our new mission yet
-agent_55: yeah we do, check the "mission list". they caught some HACK Agent as well
-agent_d5: thats crazy, anyways check out this dope giraffe i saw at the zoo the other day
-agent_55: hahahaha thats awesome
+agent_5a247455: MESSAGE_DELETED
+agent_521bcd5: Have you got word on our new mission yet
+agent_5a247455: yeah we do, check the "mission list". they caught some HACK Agent as well
+agent_521bcd5: thats crazy, anyways check out this dope giraffe i saw at the zoo the other day
+agent_5a247455: hahahaha thats awesome
 ```
+<br>
+Nothing interesting except those usernames. I tried using all those usernames in forgotpassword endpoint and only two of them exist. To reset thier password, a secret question has to be answered. They were:  
+**1) Whats the name of your favourite animal lion at the zoo?**   
+**2) Whats your favourite hobby?**  
+I was stuck at this point and looking at discussion in discord and talking with some friends, i got hint to OSINT by geolocation. I used googlemaps for this purpose and got a zoo name **San Francisco Zoo**. 
 
+![Encrypted Chat](/writeups/assets/images/bugcrowd0x07_googlemaps_osint.png)
+
+Searching their twitter page, website and other social media, i got nothing. I was trying to bruteforce lion names. After spending lot of hours on OSINT, i simply decided to search SF Zoo Lion name and got answer Jahari. I logged in using password the reset page provided. However, there was no flag. At start i said that `/radio` endpoint caused redirection to `/login` probably due to fact we weren't logged in. Visiting the endpoint `/radio` give me flag as well as message that there is something hidden inside agent images.
