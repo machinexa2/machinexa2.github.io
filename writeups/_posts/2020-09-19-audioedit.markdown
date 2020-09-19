@@ -136,6 +136,7 @@ I did some SQL magic in column **File** and found out the flag was in file `supe
 Its the final step, setting visualization to sonogram and editing some other stuffs, i get the flag embedded in image.
 
 ![Random Column name](/writeups/assets/images/ctflearn_audioedit_flag.png)
+Also i used this resource constantly during exploiting SQLi: [SQL Wiki](https://sqlwiki.netspi.com/)
 
 
 # Takeaway 
