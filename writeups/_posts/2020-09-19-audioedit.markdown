@@ -144,5 +144,5 @@ Also i used this resource constantly during exploiting SQLi: [SQL Wiki](https://
 
 * Always check for lenth of SQL query you can inject
 * Pay attention to smaller details to prevent error
-* Never edit a file by hand in `Burpsuite` especially binary files.
+* Never edit a binary by hand in `Burpsuite`
 
