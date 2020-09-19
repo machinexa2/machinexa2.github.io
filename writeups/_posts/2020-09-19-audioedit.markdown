@@ -114,7 +114,7 @@ Looks nice right? Lets go for table. I asked him about how to find tables and hi
 
 Unfortunately, its hard to include in payload thats why i did `substr()` method. Also, debugging my payload and improving it i get:     
 `' and 2=2 or (SELECT substr(table_name,1,1) FROM information_schema.tables where table_schema = 'audioedit' limit 1)='h' or '`    
-`setcmd()` function is sligtly modifed and exploiting gives me `audioedit` which is same as database name.
+I also modified `setcmd()` function slightly and exploiting gives me `audioedit` which is same as database name.
 
 Ah, i was tired and irritated. Took some **caffeine** again and got started. For numbers of columns in that table, querying information schema i used this:   
 `' and 2=2 or (SELECT substring(count(*),1,1) FROM information_schema.columns WHERE table_name = 'audioedit')=1 or '`  
