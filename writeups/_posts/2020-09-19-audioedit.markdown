@@ -12,7 +12,7 @@ The CTF was terribly insane blind SQLi. I started in morning,  lost my entire da
 # Finding the Injection
 As its name suggest, it takes `.mp3` file and edits it. So, we have a file upload which leads to edit page with unique generated filename. I tried playing with file upload. Eventually, it lead me to nowhere and i assumed file upload was secure. So, what to do then. Well, it took me sometime to realize the file was being fetched from database. The parameter looked like this: [?file=0b07586dffe744a6f2ee824248ed8e61283a3497.mp3](https://web.ctflearn.com/audioedit/edit.php?file=0b07586dffe744a6f2ee824248ed8e61283a3497.mp3)  
 
-Though he said SQLi isnt here still I tried SQL injection and injecting a quote, i  got error **"Error fetching audio from DB"** which confirmed the vulnerability.
+Though jokr said SQLi isnt here still I tried SQL injection and injecting a quote, i  got error **"Error fetching audio from DB"** which confirmed the vulnerability.
 
 ![Error String](/writeups/assets/images/ctflearn_audioedit_errorpage.png)
 
