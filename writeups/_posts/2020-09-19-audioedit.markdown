@@ -7,7 +7,7 @@ image: /writeups/assets/images/ctflearn_audioedit_homepage.png
 category: Writeups
 ---
 
-The CTF was terribly insane blind SQLi. I started in morning,  lost my entire day on simple mistakes and got real frustated when doing the challenge. The URL was [https://web.ctflearn.com/audioedit/](https://web.ctflearn.com/audioedit/). I received this challenge in night from my friend **Jokr**.So, lets get started.
+The CTF was terribly insane blind SQLi. I started in morning,  lost my entire day on simple mistakes and got real frustated when doing the challenge. The URL was [https://web.ctflearn.com/audioedit/](https://web.ctflearn.com/audioedit/). I received this challenge in night from my friend **Jokr**. So, lets get started.
 
 # Finding the Injection
 As its name suggest, it takes `.mp3` file and edits it. So, we have a file upload which leads to edit page with unique generated filename. I tried playing with file upload. Eventually, it lead me to nowhere and i assumed file upload was secure. So, what to do then. Well, it took me sometime to realize the file was being fetched from database. The parameter looked like this: [?file=0b07586dffe744a6f2ee824248ed8e61283a3497.mp3](https://web.ctflearn.com/audioedit/edit.php?file=0b07586dffe744a6f2ee824248ed8e61283a3497.mp3)  
