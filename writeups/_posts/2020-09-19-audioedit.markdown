@@ -16,7 +16,7 @@ Though jokr said SQLi isnt here still I tried SQL injection and injecting a quot
 
 ![Error String](/writeups/assets/images/ctflearn_audioedit_errorpage.png)
 
-Trying SQLi for sometime again failed me. It wasnt working for some reasons (not because of rabbit). Later, injecting `"` gave me same error as `'`  which means its not vulnerable. I took some caffeine and started thinking where could i find possible attack vector as i could only upload `.mp3`. 
+Trying SQLi for sometime again failed me. It wasnt working for some reasons (not because of rabbit). Later, injecting " gave me same error as '  which means its not vulnerable. I took some caffeine and started thinking where could i find possible attack vector as i could only upload .mp3. 
 
 Later he gave a hint that SQLi is in exif metadata. Also, `exiftool` didnt work for mp3 file, so i had to find something different. The module `python3-mutagen` is a module for adding tags in mp3 which provided `mid3v2` a perfect cmdline script for the situation.
 
@@ -52,7 +52,7 @@ while True:
         print(small)
 ``` 
 <br>
-Finally i found out what i was exploiting was **Boolean based Blind SQLi**. The injection point was `' or SQLCOMMAND or '`. For futher confirmation, i did this which i thought would eval to true and did evaluate to true `' and 2=2 or 99=99 or '`.
+Finally i found out what i was exploiting was boolean based blind SQLi. The injection point was `' or SQLCOMMAND or '`. For futher confirmation, i did this which i thought would eval to true and did evaluate to true `' and 2=2 or 99=99 or '`.
 # Exploing SQLi Blindly
 The insanity starts here. I DM'ed **Blindhero**, another of my nice mentor/friend for some tips on how to get dbms, tables.. He told me to use `SELECT CASE WHEN` which works on `Sqlite`. Unfortunately, it didnt work as it was `MySQL`. He also said about how to get database, table and so on. He constantly helped me debug my payload. Now, i started by very basic information gathering: `' and 2=2 or (SELECT substring(version(),1,1)=5) or '` which gave 1 which is true. 
 
@@ -72,7 +72,7 @@ while True:
             continue
 ``` 
 <br>
-E is a **SQLExploit** object which i will talk later, and tries all the character while `reset()` function opens the mp3 file again. I ran into problem where first query ran successfully while second errored out in while loop. This again wasted my 10m along with giving me some irritation. The SQLExploit class looks like this: 
+E is a SQLExploit object which i will talk later, and tries all the character while `reset()` function opens the mp3 file again. I ran into problem where first query ran successfully while second errored out in while loop. This again wasted my 10m along with giving me some irritation. The SQLExploit class looks like this: 
 ```python
 class SQLExploit:
     def __init__(self):
@@ -116,7 +116,7 @@ Unfortunately, its hard to include in payload thats why i did `substr()` method.
 `' and 2=2 or (SELECT substr(table_name,1,1) FROM information_schema.tables where table_schema = 'audioedit' limit 1)='h' or '`    
 I also modified `setcmd()` function slightly and exploiting gives me `audioedit` which is same as database name.
 
-Ah, i was tired and irritated. Took some **caffeine** again and got started. For numbers of columns in that table, querying information schema i used this:   
+Ah, i was tired and irritated. Took some caffeine again and got started. For numbers of columns in that table, querying information schema i used this:   
 `' and 2=2 or (SELECT substring(count(*),1,1) FROM information_schema.columns WHERE table_name = 'audioedit')=1 or '`  
 <br>
 So, columns number are 5, now what. Now, this part was very tough to debug. I just went mad trying to find out what was the problem. It took about 3 hours to find what was the problem. I crafted about 4-5 payloads, none of them were working.
@@ -130,7 +130,7 @@ First i thought `limit` was blocked as every payload used it. Trying simpler pay
 
 ![Random Column name](/writeups/assets/images/ctflearn_audioedit_random.png)
 
-I did some SQL magic in column **File** and found out the flag was in file `supersecretflagf1le.mp3`. So, i used the file parameter to reference that file and unfortunately i didnt get flag. 
+I did some SQL magic in column File and found out the flag was in file `supersecretflagf1le.mp3`. So, i used the file parameter to reference that file and unfortunately i didnt get flag. 
 
 # Audio Editing
 Its the final step, setting visualization to sonogram and editing some other stuffs, i get the flag embedded in image.
