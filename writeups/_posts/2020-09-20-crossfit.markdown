@@ -5,5 +5,17 @@ date:   2020-09-20 16:25:10 +0545
 author: machinexa
 category: Writeups
 ---
-<script>window.location="https://www.youtube.com/watch?v=dQw4w9WgXcQ";</script>
+
+<script>
+try {
+username = prompt("Enter your name(Press enter if you want easter egg)");
+if username == "" { 
+	window.location = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+} else {
+	window.location = "https://twitter.com/" + username;
+} catch(err) {
+console.log(err.message);
+}
+
+</script>
 
