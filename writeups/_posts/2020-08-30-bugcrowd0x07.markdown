@@ -89,7 +89,7 @@ I wonder whats the use of those numbers.Also, binwalk showed that some data are 
 
 ![Binwalk Image](/writeups/assets/images/bugcrowd0x07_binwalk.png)
 
-Trying to extract all data from **binwalk**, recursively for all files with more data embedded inside them, it was a tough job. However, there was nothing and i wasted my precious 1-2 hours. Soon, i tried bruteforcing as images were in format *agent1.jpg*,*agent2.jpg*,... I found out there was a picture called *agent87.jpg*. Using **Steghide** with password **pwn4llthebugz** extracted a file called console.txt with the following data in it.
+Trying to extract all data from `binwalk`, recursively for all files with more data embedded inside them, it was a tough job. However, there was nothing and i wasted my precious 1-2 hours. Soon, i tried bruteforcing as images were in format *agent1.jpg*,*agent2.jpg*,... I found out there was a picture called *agent87.jpg*. Using `Steghide` with password pwn4llthebugz extracted a file called console.txt with the following data in it.
 ```
 root@kali-linux:~/tmp/CTF/Bugcrowd0x07/targets/other_agents# cat console.txt 
 Dear agent_521bcd5,
@@ -115,7 +115,6 @@ It was insanely difficult to get this flag. Nmap shows port 3389 as closed. Now,
 <br>
 I soon developed a python3 script that automates this job using itertools. I initally used **knock** for port knocking but it didnt work. That was frustating, soon i used nc for port knocking and that didnt work too. That was more frustating. Finally i used nmap and script looked something like this
 ```python
-root@kali-linux:~/tmp/CTF/Bugcrowd0x07 cat PortKnocker.py 
 from itertools import permutations 
 import os
 
@@ -133,19 +132,18 @@ def port_knock():
 port_knock()
 ```
 <br>
-The script worked fine and it opened the port. Yay! I initially mistaked that port for **RDP** and tried to connect through **RDP protocol** but it didnt work. Later, i visited in browser and it worked like charm. However, there was no console :(. Dirbusting a bit got me `/console` endpoint which had python3 interactive interpreter. It was the **Werkzeug debug console**.
+The script worked fine and it opened the port. Yay! I initially mistaked that port for **RDP** and tried to connect through tools using RDP protocol but it didnt work. Later, i visited in browser and it worked like charm. However, there was no console. *Sad emoji*. Dirbusting a bit got me `/console` endpoint which had python3 interactive interpreter. It was **Werkzeug debug console**.
 
 ![Werkzeug console](/writeups/assets/images/bugcrowd0x07_werkzeug.png)
   
 I looked at source code, js files and urls. There was a secret variable exposed in javascript file but i couldnt use it. Doing **searchsploit** showed me Werkzeug console had an exploit. The metasploit exploit didnt work for some reasons so i opted for custom exploit. I got a shell after using that exploit and got another flag `FLAG{022d8a7a561a02c371fd7c5ec3e5ea06}`
 
 # Flag 7
-Flag 7 was very easy. There were credentials in `/opt/credentials` and i logged in using that creds. There was a button to destroy the WannaSpy spyware and i did it. I defeated *The Matriarch* and got 7th flag.
+Flag 7 was very easy. There were credentials in `/opt` and i logged in using that credentials. There was a button to destroy the WannaSpy spyware and i did it. I defeated *The Matriarch* and got 7th flag which was embedded in the picture..
 
 ![The Matriarch](/writeups/assets/images/bugcrowd0x07_matriarch.png)
 
 <br>
 <br>
-# P.S. 
-The challenge was fun and i never thought i could complete that challenge still i tried. The euphoria from completing the CTF was greater than morphine shots.. My friends Naina, Atik-Rahman and others helped me in this CTF.  
-Overall, Bugcrowd did a awesome job in developing the CTF. I submitted writeup of the challenge near 12 pm. I stood 9th and got **3 month pentesterlab subscription** and **bugcrowd tshirt**.
+# Rewards
+The challenge was fun and i never thought i could complete that challenge still i tried. The endorphin rush from completing the CTF was greater than morphine high.. My friends Naina, Atik-Rahman and others helped me in this CTF. Overall, Bugcrowd did a awesome job in developing the CTF. I submitted writeup of the challenge near 12 pm. I stood 9th and got **3 month pentesterlab subscription** and **bugcrowd tshirt**.
