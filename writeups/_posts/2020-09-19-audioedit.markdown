@@ -72,7 +72,7 @@ while True:
             continue
 ``` 
 <br>
-E is a SQLExploit object which i will talk later, and tries all the character while `reset()` function opens the mp3 file again. I ran into problem where first query ran successfully while second errored out in while loop. This again wasted my 10m along with giving me some irritation. The SQLExploit class looks like this: 
+E is a SQLExploit object which i will talk later, and tries all the character while `reset()` function opens the mp3 file again. I ran into problem where first query ran successfully while second errored out in while loop. This again wasted my 10 minutes along with giving me some irritation. Later i fixed it by reopening the file each time i execute the loop. The SQLExploit class looks like this: 
 ```python
 class SQLExploit:
     def __init__(self):
