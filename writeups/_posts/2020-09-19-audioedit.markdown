@@ -54,7 +54,7 @@ while True:
 <br>
 Finally i found out what i was exploiting was boolean based blind SQLi. The injection point was `' or SQLCOMMAND or '`. For futher confirmation, i did this which i thought would eval to true and did evaluate to true `' and 2=2 or 99=99 or '`.
 # Exploing SQLi Blindly
-The insanity starts here. I DM'ed **Blindhero**, another of my nice mentor/friend for some tips on how to get dbms, tables.. He told me to use `SELECT CASE WHEN` which works on `Sqlite`. Unfortunately, it didnt work as it was `MySQL`. He also said about how to get database, table and so on. He constantly helped me debug my payload. Now, i started by very basic information gathering payload `' and 2=2 or (SELECT substr(version(),1,1)=5) or '`  returned 1,which is equivalent to boolean true. 
+The insanity starts here. I DM'ed **Blindhero**, another of my nice mentor/friend for some tips on how to get dbms, tables.. He told me to use `SELECT CASE WHEN` which works on `Sqlite`. Unfortunately, it didnt work as it was `MySQL`. He also said about how to get database, table and so on. He constantly helped me debug my payload. Now, i started by very basic information gathering payload `' and 2=2 or (SELECT substr(version(),1,1)=5) or '`  which returned 1 and is equivalent to boolean true. 
 
 Then, moving forward to finding current database which was not easy but ok. Since, it was boolean based blind doing it by hand would take ages. So, i coded some exploit. Crafting query took time but eventually this `' and 2=2 or (SELECT substr(database(),1,1)='a')` returned true. Here's some of my code with explanation *(shitty code)*.
 ```python
