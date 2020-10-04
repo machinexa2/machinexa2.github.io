@@ -136,16 +136,16 @@ First i thought `limit` was blocked as every payload used it. Trying simpler pay
 I did some SQL magic in column File and found out the flag was in file `supersecretflagf1le.mp3`. So, i used the file parameter to reference that file and unfortunately i didnt get flag. 
 
 # Audio Editing
-Its the final step, setting visualization to sonogram and editing some other stuffs, i get the flag embedded in image.
+Its the final step, setting visualization to sonogram and editing some other stuffs, i get the flag embedded in image. After submitting i felt quite relaxed.
 
 ![Random Column name](/writeups/assets/images/ctflearn_audioedit_flag.png)
 
-Also i used this resource constantly during exploiting SQLi: [SQL Wiki](https://sqlwiki.netspi.com/)
+I used this resource constantly during exploiting SQLi: [SQL Wiki](https://sqlwiki.netspi.com/)
 
 
 # Takeaway 
 
-* Always check for lenth of SQL query you can inject
-* Pay attention to smaller details to prevent error
-* Never edit a binary by hand in `Burpsuite`
+* Always check for lenth of SQL query you can inject.
+* Pay attention to smaller details to prevent error.
+* Never edit a binary by hand in Burpsuite. Its prone to errors.
 
