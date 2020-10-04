@@ -7,13 +7,13 @@ image: /writeups/assets/images/bugcrowd0x07.jpg
 category: Writeups
 ---
 
-I started playing this CTF and thought that i couldn't complete, but still tried. The url given was [https://07.levelupctf.com/radio](https://07.levelupctf.com/radio) and description says we are an **Agent** in top secret operation: Hack Another Day. The CTF had 7 flags in total.
+I started playing this CTF and thought that I couldn't complete, but still tried. The url given was [https://07.levelupctf.com/radio](https://07.levelupctf.com/radio) and the description says we are an **Agent** in top-secret operation: Hack Another Day. The CTF had 7 flags in total.
 
 # Flag 1
-Visiting the url, browser gets redirected to `/login`. After trying basic SQLi payloads and default credentials, i start to look at JS files for potential attack vector. I use my custom made tool *JScanner* to extract sensitive info and i get `FLAG{504e8256b8a208845fe18a77e7b304b7}` in comment as well as new url.
+Visiting the url, the browser gets redirected to `/login`. After trying basic SQLi payloads and default credentials, I start to look at JS files for the potential attack vector. I use my custom made tool *JScanner* to extract sensitive info and i get `FLAG{504e8256b8a208845fe18a77e7b304b7}` in comment as well as new url.
 
 # Flag 2
-I downloaded an apk from that url. Since i never did apk decompiling and static code analysis it was going to be hard. For some reasons, i dont like java, still somehow i had mindset to complete the CTF. Using apktool i decompiled the apk file. 
+I downloaded an apk from that url. Since I never did apk decompiling and static code analysis it was going to be hard. For some reason, I don't like java, still, somehow I had the mindset to complete the CTF. Using apktool I decompiled the apk file. 
 ```
 root@kali-linux:~/tmp/CTF/Bugcrowd0x07/apks# apktool d communications.apk 
 Picked up _JAVA_OPTIONS: -Dawt.useSystemAAFontSettings=on -Dswing.aatext=true
@@ -30,14 +30,14 @@ I: Copying unknown files...
 I: Copying original files...
 ```
 
-Looking through the files, i was overwhelmed as it was lot of files, and all i was getting was unreadable **.smali** files. Again, googling for bit showed me other tool that does decompiling very well. I used [Online Java Decompiler](http://www.javadecompilers.com/apk) and got nice looking .java files. I got the second flag `FLAG{a445c73c8cb97421d1923a8c51c221fd}` by doing `grep -ir "FLAG"`. I was tired then and went to sleep.
+Looking through the files, I was overwhelmed as it was lot of files, and all I was getting was unreadable **.smali** files. Again, googling for a bit showed me another tool that does decompile very well. I used [Online Java Decompiler](http://www.javadecompilers.com/apk) and got nice looking .java files. I got the second flag `FLAG{a445c73c8cb97421d1923a8c51c221fd}` by doing `grep -ir "FLAG"`. I was tired then and went to sleep.
 
 # Flag 3
 Third flag was difficult to find. I did dynamic analysis but it errored out when using the app. Going through all **.java** files, **MainActivity.java** was interesting. I found two different endpoints `/d41d8cd98f00b204e9800998ecf8427e/8cd98f00b204e9800998/forgotpassword` and `/fa694c73da13c94e49cc82b/06a28bdb78b6c02e16862a3/chat` from two different functions.
 
 ![Apk Code](/writeups/assets/images/bugcrowd0x07_apk_code.png)
 
-Going to forgotpassword endpoint, i can enumerate users from its error message and chat endpoint was forbidden to access as i wasnt authorized. Looking at the source code again, there is some sort of authentication mechanism by using header `3NCRYPT3D-CH4T`.So, i looked more and more into java files and finally found its key through grep.
+Going to forgot password endpoint, I can enumerate users from its error message, and chat endpoint was forbidden to access as I wasn't authorized. Looking at the source code again, there is some sort of authentication mechanism by using the header `3NCRYPT3D-CH4T`.So, I looked more and more into java files and finally found its key through grep.
 ```
 root@kali-linux:~/tmp/CTF/Bugcrowd0x07/source/source_code# rgrep "ENCRYPTED" -i
 sources/com/example/levelup/MainActivity.java:    public void encryptedChat() {
@@ -49,7 +49,7 @@ resources/res/values/strings.xml:    <string name="encrypted_chat_key">8b0955d26
 resources/res/values/public.xml:    <public type="string" name="encrypted_chat_key" id="2131492892" />
 ```
 <br>
-Having header and key, i visited the url and got chat which looks obsfucated. Hmm, nice giraffe.
+Having a header and key, I visited the url and got a chat that looks obfuscated. Hmm, nice giraffe.
 
 ![Encrypted Chat](/writeups/assets/images/bugcrowd0x07_encrypted_chat.png)
 
@@ -63,33 +63,33 @@ agent_nova: meow
 agent_5a247455: MESSAGE_DELETED
 agent_521bcd5: Have you got word on our new mission yet
 agent_5a247455: yeah we do, check the "mission list". they caught some HACK Agent as well
-agent_521bcd5: thats crazy, anyways check out this dope giraffe i saw at the zoo the other day
-agent_5a247455: hahahaha thats awesome
+agent_521bcd5: thats crazy, anyways check out this dope giraffe I saw at the zoo the other day
+agent_5a247455: hahahaha that's awesome
 ```
 <br>
-Nothing interesting except those usernames. I tried using all those usernames in forgotpassword endpoint and only two of them exist. To reset thier password, a secret question has to be answered. They were:  
-**1) Whats the name of your favourite animal lion at the zoo?**   
-**2) Whats your favourite hobby?**  
-I was stuck at this point and looking at discussion in discord and talking with some friends, i got hint to OSINT by geolocation. I used googlemaps for this purpose and got a zoo name **San Francisco Zoo**. 
+Nothing interesting except those usernames. I tried using all those usernames in forgot password endpoint and only two of them exist. To reset their password, a secret question has to be answered. They were:  
+**1) What's the name of your favorite animal lion at the zoo?**   
+**2) What's your favorite hobby?**  
+I was stuck at this point and looking at discussion in discord and talking with some friends, I got a hint to OSINT by geolocation. I used google maps for this purpose and got a zoo name **San Francisco Zoo**. 
 
 ![Googlemap OSINT](/writeups/assets/images/bugcrowd0x07_googlemaps_osint.png)
 
-Searching their twitter page, website and other social media, i got nothing. I was trying to bruteforce lion names. After spending lot of hours on OSINT, i simply decided to search SF Zoo Lion name and got answer Jahari. I logged in using password the reset page provided and got a dashboard with target list. However, there was no flag. At start i said that `/radio` endpoint caused redirection to `/login` probably due to fact we weren't logged in. Visiting the endpoint `/radio` give me flag as well as message that there is something hidden inside agent images.
+Searching for their twitter page, website, and other social media, I got nothing. I was trying to brute-force lion names. After spending a lot of hours on OSINT, I simply decided to search SF Zoo Lion name and got an answer Jahari. I logged in using the password the reset page provided and got a dashboard with a target list. However, there was no flag. At the start, I said that `/radio` endpoint caused redirection to `/login` probably due to the fact we weren't logged in. Visiting the endpoint `/radio` gives me a flag as well as a message that there is something hidden inside agent images.
 
 ![Radio Endpoint](/writeups/assets/images/bugcrowd0x07_radio_endpoint.png)
 
 The exfiltration of data through ping is useless. However, i got the password **pwn4llthebugz** as well as flag `FLAG{f0dee25f617e2cb820b9b44fcdf90ed8}`
 
 # Flag 5
-There were 9 images and i tried different steganography techniques and tools. Manually viewing the image shows random numbers inside of pics. I got 3 random numbers: 1337,2099,921. One of my friend showed through changing image temperature that there is another number 415 inside one image. 
+There were 9 images and I tried different steganography techniques and tools. Manually viewing the image shows random numbers inside of pics. I got 3 random numbers: 1337,2099,921. One of my friends showed through changing image temperature that there is another number 415 inside one image. 
 
 ![Temperature Changed](/writeups/assets/images/bugcrowd0x07_color_temperature.png)
 
-I wonder whats the use of those numbers.Also, binwalk showed that some data are embedded inside it.
+I wonder what's the use of those numbers. Also, binwalk showed that some data are embedded inside it.
 
 ![Binwalk Image](/writeups/assets/images/bugcrowd0x07_binwalk.png)
 
-Trying to extract all data from `binwalk`, recursively for all files with more data embedded inside them, it was a tough job. However, there was nothing and i wasted my precious 1-2 hours. Soon, i tried bruteforcing as images were in format *agent1.jpg*,*agent2.jpg*,... I found out there was a picture called *agent87.jpg*. Using `Steghide` with password pwn4llthebugz extracted a file called console.txt with the following data in it.
+Trying to extract all data from `binwalk`, recursively for all files with more data embedded inside them, it was a tough job. However, there was nothing and I wasted my precious 1-2 hours. Soon, I tried brute-forcing as images were in format *agent1.jpg*,*agent2.jpg*,... I found out there was a picture called *agent87.jpg*. Using `Steghide` with password pwn4llthebugz extracted a file called console.txt with the following data in it.
 ```
 root@kali-linux:~/tmp/CTF/Bugcrowd0x07/targets/other_agents# cat console.txt 
 Dear agent_521bcd5,
@@ -109,11 +109,11 @@ agent_1337
 Here's our dear flag `FLAG{f0dee25f617e2cb820b9b44fcdf90ed8}`.
 
 # Flag 6
-It was insanely difficult to get this flag. Nmap shows port 3389 as closed. Now, i was stuck. Again, going to official bugcrowd discord server, i found that we have to do port knocking. The random numbers were port numbers, all of them were closed. For those who dont know what port knocking is:    
+It was insanely difficult to get this flag. Nmap shows port 3389 as closed. Now, I was stuck. Again, going to the official bugcrowd discord server, I found that we have to do port knocking. The random numbers were port numbers, all of them were closed. For those who don't know what port knocking is:    
 <br>
 `"In computer networking, port knocking is a method of externally opening ports on a firewall by generating a connection attempt on a set of prespecified closed ports. Once a correct sequence of connection attempts is received, the firewall rules are dynamically modified to allow the host which sent the connection attempts to connect over specific port(s)"`  
 <br>
-I soon developed a python3 script that automates this job using itertools. I initally used **knock** for port knocking but it didnt work. That was frustating, soon i used nc for port knocking and that didnt work too. That was more frustating. Finally i used nmap and script looked something like this
+I soon developed a python3 script that automates this job using itertools. I initially used **knock** for port knocking but it didn't work. That was frustrating, soon I used nc for port knocking, and that didn't work too. That was more frustating. Finally, I used Nmap and the script looked something like this
 ```python
 from itertools import permutations 
 import os
@@ -132,18 +132,19 @@ def port_knock():
 port_knock()
 ```
 <br>
-The script worked fine and it opened the port. Yay! I initially mistaked that port for **RDP** and tried to connect through tools using RDP protocol but it didnt work. Later, i visited in browser and it worked like charm. However, there was no console. *Sad emoji*. Dirbusting a bit got me `/console` endpoint which had python3 interactive interpreter. It was **Werkzeug debug console**.
+The script worked fine and it opened the port. Yay! I initially mistook that port for **RDP** and tried to connect through tools using RDP protocol but it didn't work. Later, I visited in the browser and it worked like charm. However, there was no console. *Sad emoji*. Dirbusting a bit got me `/console` endpoint which had a python3 interactive interpreter. It was **Werkzeug debug console**.
 
 ![Werkzeug console](/writeups/assets/images/bugcrowd0x07_werkzeug.png)
   
-I looked at source code, js files and urls. There was a secret variable exposed in javascript file but i couldnt use it. Doing **searchsploit** showed me Werkzeug console had an exploit. The metasploit exploit didnt work for some reasons so i opted for custom exploit. I got a shell after using that exploit and got another flag `FLAG{022d8a7a561a02c371fd7c5ec3e5ea06}`
+I looked at source code, js files, and URLs. There was a secret variable exposed in the javascript file but I couldn't use it. Doing **searchsploit** showed me Werkzeug console had an exploit. The Metasploit exploit didn't work for some reason so I opted for a custom exploit. I got a shell after using that exploit and got another flag `FLAG{022d8a7a561a02c371fd7c5ec3e5ea06}`
 
 # Flag 7
-Flag 7 was very easy. There were credentials in `/opt` and i logged in using that credentials. There was a button to destroy the WannaSpy spyware and i did it. I defeated *The Matriarch* and got 7th flag which was embedded in the picture..
+Flag 7 was very easy. There were credentials in `/opt` and I logged in using that credentials. There was a button to destroy the WannaSpy spyware and I did it. I defeated *The Matriarch* and got 7th flag which was embedded in the picture...
 
 ![The Matriarch](/writeups/assets/images/bugcrowd0x07_matriarch.png)
 
 <br>
 <br>
 # Rewards
-The challenge was fun and i never thought i could complete that challenge still i tried. The endorphin rush from completing the CTF was greater than morphine high.. My friends Naina, Atik-Rahman and others helped me in this CTF. Overall, Bugcrowd did a awesome job in developing the CTF. I submitted writeup of the challenge near 12 pm. I stood 9th and got **3 month pentesterlab subscription** and **bugcrowd tshirt**.
+The challenge was fun and I never thought I could complete that challenge still I tried. The endorphin rush from completing the CTF was greater than morphine high... My friends Naina, Atik-Rahman, and others helped me in this CTF. Overall, Bugcrowd did an awesome job in developing the CTF. I submitted a writeup of the challenge near 12 pm. I stood 9th and got ** 3-month pentesterlab subscription** and **bugcrowd tshirt**.
+
