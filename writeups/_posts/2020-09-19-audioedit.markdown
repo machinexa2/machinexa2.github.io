@@ -21,7 +21,7 @@ Trying SQLi for sometime again failed me. It wasnt working for some reasons (not
 Later he gave a hint that SQLi is in exif metadata. Also, `exiftool` didnt work for mp3 file, so i had to find something different. The module `python3-mutagen` is a module for adding tags in mp3 which provided `mid3v2` a perfect cmdline script for the situation.
 
 # Knowing the Injection
-First, i confirmed the vulnerability by adding a single quote (and by testing double quote). This command injects author tag in mp3: `mid3v2 -a "' or '" testing.mp3`. I got 0 in author response which indicates condition evaluated to False. Since, running program, uploading it and checking condition is lengthy, i used `Burpsuite` which was my second mistake.  
+First, i confirmed the vulnerability by adding a single quote (and by testing double quote). `mid3v2 -a "' or '" testing.mp3` is a example on how to inject SQL payload to music tags. I got 0 in author response which indicates condition evaluated to False. Since, running program, uploading it and checking condition is lengthy, i used `Burpsuite` which was my second mistake.  
 
 ![Burp Request](/writeups/assets/images/ctflearn_audioedit_burprequest.png)
 
