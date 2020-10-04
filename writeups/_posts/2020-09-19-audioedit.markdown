@@ -129,7 +129,7 @@ So, after running script i know number of columns are 5, now what. After writing
 ' and 2=2 or (select substr(column_name,1,1)='y' from information_schema.columns where table_name = 'audioedit' limit 1,1) or '
 ```
 <br>
-First i thought `limit` was blocked as every payload used it. Trying simpler payloads like `' and 2=2 or (select version() like '5%' limit 1) or '` did work. I got to a point when payload was large, then i added `()`  which caused error. Oh, so spaces are the problem. Why the hell did i used `2=2`. Shit. Also, i reduced `get_random_string()` to length of 2. Finally it worked like a charm and got the first column name, then second, then third. 
+First i thought `limit` was blocked as every payload used it. Trying simpler payloads like `' and 2=2 or (select version() like '5%' limit 1) or '` did work. I got to a point when payload was large, then i added `()`  which caused error. Oh, so spaces are the problem. Why the hell did i used `2=2`. Shit. Also, i reduced `get_random_string()` to length of 2. Finally it worked like a charm and got the first column name, then second, then third... 
 
 ![Random Column name](/writeups/assets/images/ctflearn_audioedit_random.png)
 
