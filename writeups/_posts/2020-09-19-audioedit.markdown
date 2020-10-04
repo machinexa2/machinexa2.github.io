@@ -25,7 +25,7 @@ First, i confirmed the vulnerability by adding a single quote (and by testing do
 
 ![Burp Request](/writeups/assets/images/ctflearn_audioedit_burprequest.png)
 
-I tried sending some advanced payloads like `' or 1=1 or '` and `' and 1=1 and '` to see how it behaves. Unfortunately, it was throwing error. Each time i tried something new, it gave a error. One more thing to notice is that sending file content with same text but entirely different extension caused **File Exist** error to be thrown. Mine frustation slowly increased with time, later i found out it was because i directly edited the response *(which i should never have).*
+I tried sending some advanced payloads like `' or 1=1 or '` and `' and 1=1 and '` to see how it behaves. Unfortunately, it was throwing error. Each time i tried something new, it gave a error. One more thing to notice is that sending file content with same content but entirely different filename caused **File Exist** error to be thrown. Mine frustation slowly increased with time, later i found out it was because i directly edited the request from burpsuite *(which i should never have).*
 
 I tried to make a python3 script to upload the file and directly give me response which cost me around 1-2 hour. I used http instead of https which caused error. Finally i have a script that does automatically does everything, i just have to type the payload. Here's a small portion: 
 ```python
