@@ -45,7 +45,7 @@ Looking at a different perspective, I found the following details:
 In above picture, first i editted `index.html` to fetch image and returned response size, then i used .html which gave error **Invalid Image Url**. At last, using `hi.html.jpg` gave error as shown in picture. I tried putting HTML, PHP, and other code in the jpeg mimetype file but it didn't work. I also tried using Exif tags for code execution which didn't work too. I was quite lost at these moments and those weird hints from BugPoC made me madder.  
 
 ### Hitting the jackpot
-Since, HEAD request was used to verify whether its image or not, I coded in tornado to create a server. I set content-type and other headers of image, and issued redirection to /etc/passwd at second get request which should hopefully get us /etc/passwd. A small snippet shows how I coded it:   
+Since, HEAD request was used to verify whether its image or not, I coded in python3 to create a tornado server. I set content-type and other headers of image, and issued redirection by location header to file:///etc/passwd at second get request which should hopefully get us /etc/passwd. A small snippet shows how I coded it:   
 ```python
 class FileHandler(tornado.web.RequestHandler):
     def head(self):
