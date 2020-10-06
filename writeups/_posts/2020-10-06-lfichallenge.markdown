@@ -9,7 +9,7 @@ category: Writeups
 <br>
 
 ## Description
-Browsing twitter i saw a new challenge from BugPoC which was about LFI I immediately started solving it. The image said to visit [http://social.buggywebsite.com/](https://social.buggywebsite.com/) to start the challenge. Also, since it was server sided bug, i got energized to solve. 
+Browsing Twitter I saw a new challenge from BugPoC which was about LFI I immediately started solving it. The image instructed me to visit [http://social.buggywebsite.com/](https://social.buggywebsite.com/) to start the challenge. Also, since it was a server-sided bug, I got energized to solve it. 
 
 ### Starting point
 First of I had to find sink where i could execute LFI. I tried typing and it generated the option to share. Looking at the source code more, i find a compressed javascript file, it showed various functinons. After analyzing the code, I found out only request starting with `https` made an xhr request and to https://api.buggywebsite.com. It send json data with url and requestTime parameter.
@@ -26,23 +26,23 @@ function processUrl(e) {
 ```
 
 ### Developing client
-I had to write a client that interacts with API with those parameters filled with value. First, i found `get_second()` (a function to get current second) in stackoverflow answer. Then for url i used input prompt on while loop. This is what a successful response looks like, and it also returns image in base64 encoded form.   
+I had to write a client that interacts with API with those parameters filled with value. First, i found `get_second()` (a function to get current second) in StackOverflow answer. Then for url, I used input prompt on while loop. This is what a successful response looks like, and it also returns an image in base64 encoded form.   
 
 ![Response](/writeups/assets/images/lfichallenge_response.png)
 
-I used json module to parse the data then the content of image is dumped to file. Here's my source code [Exploit.py](https://gist.github.com/machinexa2/118a7983b407cca55a6a1801a10acb7c); Now, i tried different stuffs, ideas such as SSRF but it wasnt working. I later realized it was using urllib3 to make requests which could never result in LFI but only SSRF. Also, SSRF was also not possible as it was not showing response and was probably blocked. Also, since the API wasnt vulnerable i looked for other endpoints etc but nothing seemed to work. Playing with it for some amount of time releaved something that i missed before.  
+I used the JSON module to parse the data then the content of the image is dumped to file. Here's my source code [Exploit.py](https://gist.github.com/machinexa2/118a7983b407cca55a6a1801a10acb7c); Now, I tried different kinds of stuff, ideas such as SSRF but it wasn't working. I later realized it was using urllib3 to make requests which could never result in LFI but only SSRF. SSRF was also not possible as it was not showing response and was probably blocked. Also, since the API wasn't vulnerable I looked for other endpoints etc but nothing seemed to work. Playing with it for some amount of time revealed something that I missed before.  
 
 ### Open Graph metadata
-It was parsing the `<meta>` tags and reflecting them. OG is short for Open Graph which allows web page to become a rich object in social graph. It had lot of tags and some tags that were being reflected were `og:description`, `og:type`, `og:image` and `og.url`. Also, description, type and url didnt have much effect on the server. However, image was again fetching resources and used urllib3. Trying for SSRF again failed me and wasnt solution of challenge so i moved on.
+It was parsing the `<meta>` tags and reflecting them. OG is short for Open Graph which allows a web page to become a rich object in the social graph. It had a lot of tags and some tags that were being reflected were `og: description`, `og: type`, `og: image`, and `og.url`. Also, description, type, and url didn't have much effect on the server. However, the image was again fetching resources and used urllib3. Trying for SSRF again failed me and SSRF wasn't a solution to the challenge so I moved on.
 
-Looking at different perspective, i found the following details:
+Looking at a different perspective, I found the following details:
 * It fetches similar to this `^https://.*\.(jpg|svg|png)`
-* Serving other file with extensions fails HEAD test, parser checks by mimetype which can be bypassed
-* Seriving `.jpg` file with jpg magic header, base64 encodes the returned image response   
+* Serving another file with extensions fails a HEAD request, parser checks by mimetype which can be bypassed
+* Serving `.jpg` file with jpg magic header, base64 encodes the returned image response   
 
 ![Details](/writeups/assets/images/lfichallenge_details.png)
 
-I tried putting html, php and other code in jpeg mimetype file but it didnt work. I also tried using exif tags for code execution which didnt work too. I was quite lost at this moments and those weird hints from BugPoC made me more mad.  
+I tried putting HTML, PHP, and other code in the jpeg mimetype file but it didn't work. I also tried using Exif tags for code execution which didn't work too. I was quite lost at these moments and those weird hints from BugPoC made me madder.  
 
 ### Hitting the jackpot
 Since, HEAD request was used to verify whether its image or not, I coded in tornado to create a server. I set content-type and other headers of image, and issued redirection to /etc/passwd at second get request which should hopefully get us /etc/passwd. A small snippet shows how I coded it:   
@@ -70,14 +70,15 @@ class IndexHandler(tornado.web.RequestHandler):
             self.write(f.read())
 ```
 <br>
-Now, lets host the malicious server, and get that file. Also, i rechanged lot of my exploit.py and other files to make it as easy to get the file. I hit the jackpot got the file!
+Now, let's host the malicious server, and get that file. Also, I rechanged a lot of my exploit.py code and other files to make it as easy to get the file. I hit the jackpot got the file!
 
 ![Pwned](/writeups/assets/images/lfichallenge_pwned.png)
 
 ## Takeaway 
 
-* Always try harder, if i left when i failed SSRF, I couldn't have solved the challenge 
-* Javascript files are gold mine. Do always read them and try to find sensitive endpoints.
+* Always try harder, if I left when I failed SSRF, I couldn't have solved the challenge 
+* Javascript files are a gold mine. Do always read them and try to find sensitive endpoints.
 * Coding is essential to exploit development. Make sure you master at least a single programming language.
 
-Some hints from BugPoC helped me but last ones were absurb and meaningless. Also, I necessarily didnt have to code server and client. For server i could have used BugPoC mock endpoint and for client i could have user either burp or browser thought for testing purposes, client is best!
+Some hints from BugPoC helped me but the last ones were absurd and meaningless. Also, I necessarily didnt have to code server and client. For the server, I could have used BugPoC mock endpoint and for a client, I could have used either burp or browser thought for testing purposes, the client is best!
+
