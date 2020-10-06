@@ -38,7 +38,7 @@ It was parsing the `<meta>` tags and reflecting them. OG is short for Open Graph
 Looking at a different perspective, I found the following details:
 * It fetches similar to this `^https://.*\.(jpg|svg|png)$`
 * Serving another file with extensions fails a HEAD request, parser checks by mimetype which can be bypassed
-* Serving `.jpg` file with jpg magic header, base64 encodes the returned image response   
+* Serving `.jpg` file with jpg or other image magic header, parser base64 encodes image and returns it
 
 ![Details](/writeups/assets/images/lfichallenge_details.png)
 
