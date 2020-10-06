@@ -9,7 +9,7 @@ category: Writeups
 
 The CTF was terribly insane blind SQLi. I started in the morning,  lost my entire day on simple mistakes, and got really frustrated when doing the challenge. The URL was [https://web.ctflearn.com/audioedit/](https://web.ctflearn.com/audioedit/). I received this challenge at night from my friend **Jokr**. So, let's get started.
 
-# Finding the Injection
+### Finding the Injection
 As its name suggests, it takes `.mp3` file and edits it. So, we have a file upload which leads to an edit page with a unique generated filename. I tried playing with file upload. Eventually, it leads me to nowhere and I assumed file upload was secure. So, what to do then. Well, it took me some time to realize the file was being fetched from the database. The parameter looked like this: [?file=0b07586dffe744a6f2ee824248ed8e61283a3497.mp3](https://web.ctflearn.com/audioedit/edit.php?file=0b07586dffe744a6f2ee824248ed8e61283a3497.mp3)  
 
 Though jokr said SQLi isn't here still I tried SQL injection and injecting a quote, I got error **" Error fetching audio from DB"** which confirmed the vulnerability.
@@ -20,7 +20,7 @@ Trying SQLi for some time again failed me. It wasn't working for some reason (no
 
 Later he gave a hint that SQLi is in Exif metadata. Also, `exiftool` didn't work for the mp3 file, so I had to find something different. The module `python3-mutagen` is a module for adding tags in mp3 which provided `mid3v2` a perfect cmd line script for the situation.
 
-# Knowing the Injection
+### Knowing the Injection
 First, I found the vulnerability by adding ' and " and then confirmed it. `mid3v2 -a "' or '" testing.mp3` is an example of how to inject SQL payload to music tags. I got 0 in author response which indicates condition evaluated to False. Since, running the program, uploading it, and checking the condition is lengthy, I used `Burpsuite` which was my second mistake.  
 
 ![Burp Request](/writeups/assets/images/ctflearn_audioedit_burprequest.png)
@@ -53,7 +53,8 @@ while True:
 ``` 
 <br>
 Finally, I found out what I was exploiting was boolean-based blind SQLi. The injection point was `' or SQL COMMAND or '`. For further confirmation, I did this which I thought would eval to true and did evaluate to true `' and 2=2 or 99=99 or '`.
-# Exploring SQLi Blindly
+
+### Exploring SQLi Blindly
 The insanity starts here. I DM'ed **Blindhero**, another of my nice mentor/friend for some tips on how to get DBMS, tables... He told me to use `SELECT CASE WHEN` which works on `Sqlite`. Unfortunately, it didn't work as it was `MySQL`. He also said about how to get a database, table, and so on. He constantly helped me debug my payload. Now, i started by very basic information gathering payload `' and 2=2 or (SELECT substr(version(),1,1)=5) or '`  which returned 1 and is equivalent to boolean true. 
 
 Then, moving forward to finding the current database which was not easy but ok. Since it was boolean-based blind doing it by hand would take ages. So, I coded some exploit. Crafting query took time but eventually this `' and 2=2 or (SELECT substr(database(),1,1)='a')` returned true. Here's some of my code with an explanation.
@@ -135,7 +136,7 @@ First, I thought `limit` was blocked as every payload used it. Trying simpler pa
 
 I did some SQL magic in column File and found out the flag was in file `supersecretflagf1le.mp3`. So, I used the file parameter to reference that file, and unfortunately, I didn't get a flag. 
 
-# Audio Editing
+### Audio Editing
 Its the final step, setting visualization to a sonogram and editing some other kind of stuff, I got the flag embedded in the image. After submitting I felt quite relaxed.
 
 ![Random Column name](/writeups/assets/images/ctflearn_audioedit_flag.png)
@@ -143,7 +144,7 @@ Its the final step, setting visualization to a sonogram and editing some other k
 I used this resource constantly during exploiting SQLi: [SQL Wiki](https://sqlwiki.netspi.com/)
 
 
-# Takeaway 
+### Takeaway 
 
 * Always check for the length of SQL query you can inject.
 * Pay attention to smaller details to prevent error.

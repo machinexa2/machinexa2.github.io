@@ -9,10 +9,10 @@ category: Writeups
 
 I started playing this CTF and thought that I couldn't complete, but still tried. The url given was [https://07.levelupctf.com/radio](https://07.levelupctf.com/radio) and the description says we are an **Agent** in top-secret operation: Hack Another Day. The CTF had 7 flags in total.
 
-# Flag 1
+### Flag 1
 Visiting the url, the browser gets redirected to `/login`. After trying basic SQLi payloads and default credentials, I start to look at JS files for the potential attack vector. I use my custom made tool *JScanner* to extract sensitive info and i get `FLAG{504e8256b8a208845fe18a77e7b304b7}` in comment as well as new url.
 
-# Flag 2
+### Flag 2
 I downloaded an apk from that url. Since I never did apk decompiling and static code analysis it was going to be hard. For some reason, I don't like java, still, somehow I had the mindset to complete the CTF. Using apktool I decompiled the apk file. 
 ```
 root@kali-linux:~/tmp/CTF/Bugcrowd0x07/apks# apktool d communications.apk 
@@ -32,7 +32,7 @@ I: Copying original files...
 
 Looking through the files, I was overwhelmed as it was lot of files, and all I was getting was unreadable **.smali** files. Again, googling for a bit showed me another tool that does decompile very well. I used [Online Java Decompiler](http://www.javadecompilers.com/apk) and got nice looking .java files. I got the second flag `FLAG{a445c73c8cb97421d1923a8c51c221fd}` by doing `grep -ir "FLAG"`. I was tired then and went to sleep.
 
-# Flag 3
+### Flag 3
 Third flag was difficult to find. I did dynamic analysis but it errored out when using the app. Going through all **.java** files, **MainActivity.java** was interesting. I found two different endpoints `/d41d8cd98f00b204e9800998ecf8427e/8cd98f00b204e9800998/forgotpassword` and `/fa694c73da13c94e49cc82b/06a28bdb78b6c02e16862a3/chat` from two different functions.
 
 ![Apk Code](/writeups/assets/images/bugcrowd0x07_apk_code.png)
@@ -55,7 +55,7 @@ Having a header and key, I visited the url and got a chat that looks obfuscated.
 
 We get the flag `FLAG{e8606532b027bfd324ea31d1b4f116c2}` and geolocation data **37°43'58.5"N 122°30'08.5"W** by looking at the exif metadata of giraffe picture.
 
-# Flag 4
+### Flag 4
 My intuition says that either its `ROT13` or `ROT47` and it turned out to be ciphertext of ROT13.
 After, decrypting, we get this: 
 ```
@@ -80,7 +80,7 @@ Searching for their twitter page, website, and other social media, I got nothing
 
 The exfiltration of data through ping is useless. However, i got the password **pwn4llthebugz** as well as flag `FLAG{f0dee25f617e2cb820b9b44fcdf90ed8}`
 
-# Flag 5
+### Flag 5
 There were 9 images and I tried different steganography techniques and tools. Manually viewing the image shows random numbers inside of pics. I got 3 random numbers: 1337,2099,921. One of my friends showed through changing image temperature that there is another number 415 inside one image. 
 
 ![Temperature Changed](/writeups/assets/images/bugcrowd0x07_color_temperature.png)
@@ -108,7 +108,7 @@ agent_1337
 <br>
 Here's our dear flag `FLAG{f0dee25f617e2cb820b9b44fcdf90ed8}`.
 
-# Flag 6
+### Flag 6
 It was insanely difficult to get this flag. Nmap shows port 3389 as closed. Now, I was stuck. Again, going to the official bugcrowd discord server, I found that we have to do port knocking. The random numbers were port numbers, all of them were closed. For those who don't know what port knocking is:    
 <br>
 `"In computer networking, port knocking is a method of externally opening ports on a firewall by generating a connection attempt on a set of prespecified closed ports. Once a correct sequence of connection attempts is received, the firewall rules are dynamically modified to allow the host which sent the connection attempts to connect over specific port(s)"`  
@@ -138,13 +138,13 @@ The script worked fine and it opened the port. Yay! I initially mistook that por
   
 I looked at source code, js files, and URLs. There was a secret variable exposed in the javascript file but I couldn't use it. Doing **searchsploit** showed me Werkzeug console had an exploit. The Metasploit exploit didn't work for some reason so I opted for a custom exploit. I got a shell after using that exploit and got another flag `FLAG{022d8a7a561a02c371fd7c5ec3e5ea06}`
 
-# Flag 7
+### Flag 7
 Flag 7 was very easy. There were credentials in `/opt` and I logged in using that credentials. There was a button to destroy the WannaSpy spyware and I did it. I defeated *The Matriarch* and got 7th flag which was embedded in the picture...
 
 ![The Matriarch](/writeups/assets/images/bugcrowd0x07_matriarch.png)
 
 <br>
 <br>
-# Rewards
+### Overall
 The challenge was fun and I never thought I could complete that challenge still I tried. The endorphin rush from completing the CTF was greater than morphine high... My friends Naina, Atik-Rahman, and others helped me in this CTF. Overall, Bugcrowd did an awesome job in developing the CTF. I submitted a writeup of the challenge near 12 pm. I stood 9th and got ** 3-month pentesterlab subscription** and **bugcrowd tshirt**.
 
