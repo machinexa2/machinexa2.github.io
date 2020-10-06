@@ -80,5 +80,5 @@ Now, let's host the malicious server, and get that file. Also, I rechanged a lot
 * Javascript files are a gold mine. Do always read them and try to find sensitive endpoints.
 * Coding is essential to exploit development. Make sure you master at least a single programming language.
 
-Some hints from BugPoC helped me but the last ones were absurd and meaningless. Also, I necessarily didnt have to code server and client. For the server, I could have used BugPoC mock endpoint and for a client, I could have used either burp or browser thought for testing purposes, the client is best!
+Some hints from BugPoC helped me but the last ones were absurd and meaningless. Also, I necessarily didnt have to code server and client. For the server, I could have used BugPoC mock endpoint and for a client, I could have used either burp or browser for testing purposes, the client is best!
 
