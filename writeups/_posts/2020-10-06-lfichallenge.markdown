@@ -74,6 +74,9 @@ Now, let's host the malicious server, and get that file. Also, I rechanged a lot
 
 ![Pwned](/writeups/assets/images/lfichallenge_pwned.png)
 
+# Changing the impact
+This is incomplete writeup and maybe changed. So, some after trying some common files i got two tokens `AWS_SESSION_TOKEN` and  `AWS_SECRET_ACCESS_KEY7`. AWS sessoin key was long and covered with lot of slashes. This is the metadata of AWS they talked about. Now currently trying to leak source code
+
 ## Takeaway 
 
 * Always try harder, if I left when I failed SSRF, I couldn't have solved the challenge 
