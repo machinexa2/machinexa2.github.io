@@ -26,11 +26,11 @@ function processUrl(e) {
 ```
 
 ### Developing client
-I had to write a client that interacts with API with those parameters filled with value. First, i found `get_second()` (a function to get current second) in stackoverflow answer. Then for url i used input prompt on while loop. A successful response is shown below. Then i parsed the data using json module. Then the content of image is dumped to file. Here's my source code: [Exploit.py](https://gist.github.com/machinexa2/118a7983b407cca55a6a1801a10acb7c)  
+I had to write a client that interacts with API with those parameters filled with value. First, i found `get_second()` (a function to get current second) in stackoverflow answer. Then for url i used input prompt on while loop. This is what a successful response looks like, and it also returns image in base64 encoded form.   
 
 ![Response](/writeups/assets/images/lfichallenge_response.png)
 
-Now, i tried different stuffs, ideas such as SSRF but it wasnt working. I later realized it was using urllib3 to make requests which could never result in LFI but only SSRF. Also, SSRF was also not possible as it was not showing response and was probably blocked. Also, since the API wasnt vulnerable i looked for other endpoints etc but nothing seemed to work. Playing with it for some amount of time releaved something that i missed before.  
+I used json module to parse the data then the content of image is dumped to file. Here's my source code [Exploit.py](https://gist.github.com/machinexa2/118a7983b407cca55a6a1801a10acb7c); Now, i tried different stuffs, ideas such as SSRF but it wasnt working. I later realized it was using urllib3 to make requests which could never result in LFI but only SSRF. Also, SSRF was also not possible as it was not showing response and was probably blocked. Also, since the API wasnt vulnerable i looked for other endpoints etc but nothing seemed to work. Playing with it for some amount of time releaved something that i missed before.  
 
 ### Open Graph metadata
 It was parsing the `<meta>` tags and reflecting them. OG is short for Open Graph which allows web page to become a rich object in social graph. It had lot of tags and some tags that were being reflected were `og:description`, `og:type`, `og:image` and `og.url`. Also, description, type and url didnt have much effect on the server. However, image was again fetching resources and used urllib3. Trying for SSRF again failed me and wasnt solution of challenge so i moved on.
