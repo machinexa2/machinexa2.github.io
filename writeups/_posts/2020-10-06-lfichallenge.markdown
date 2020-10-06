@@ -36,7 +36,7 @@ I used the JSON module to parse the data then the content of the image is dumped
 It was parsing the `<meta>` tags and reflecting them. OG is short for Open Graph which allows a web page to become a rich object in the social graph. It had a lot of tags and some tags that were being reflected were `og: description`, `og: type`, `og: image`, and `og.url`. Also, description, type, and url didn't have much effect on the server. However, the parser was again fetching resources from image tag and used urllib3 to fetch. Trying for SSRF again failed me and SSRF wasn't a solution to the challenge so I moved on.
 
 Looking at a different perspective, I found the following details:
-* It fetches similar to this `^https://.*\.(jpg|svg|png)`
+* It fetches similar to this `^https://.*\.(jpg|svg|png)$`
 * Serving another file with extensions fails a HEAD request, parser checks by mimetype which can be bypassed
 * Serving `.jpg` file with jpg magic header, base64 encodes the returned image response   
 
