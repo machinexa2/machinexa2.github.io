@@ -3,11 +3,12 @@ layout: post
 title:  "Bugcrowd 0x07 Levelup CTF"
 date:   2020-08-30 16:25:10 +0545
 author: machinexa
-image: /writeups/assets/images/bugcrowd0x07.jpg
+image: /writeups/assets/images/bugcrowd0x07.jpeg
 category: Writeups
 ---
-
-I started playing this CTF and thought that I couldn't complete, but still tried. The url given was [https://07.levelupctf.com/radio](https://07.levelupctf.com/radio) and the description says we are an **Agent** in top-secret operation: Hack Another Day. The CTF had 7 flags in total.
+<br>
+## Description
+I started playing this CTF and thought I couldn't complete it, but still tried my best. The url given was [https://07.levelupctf.com/radio](https://07.levelupctf.com/radio) and description says we are an **Agent** in top-secret operation: Hack Another Day. The CTF had 7 flags in total. The last flag would defeat **The Matriarch** and we would win.
 
 ### Flag 1
 Visiting the url, the browser gets redirected to `/login`. After trying basic SQLi payloads and default credentials, I start to look at JS files for the potential attack vector. I use my custom made tool *JScanner* to extract sensitive info and i get `FLAG{504e8256b8a208845fe18a77e7b304b7}` in comment as well as new url.

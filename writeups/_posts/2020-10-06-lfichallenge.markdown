@@ -1,17 +1,17 @@
 ---
 layout: post
-title:  "Audioedit Writeup: CTFLearn"
-date:   2020-09-18 16:25:10 +0545
+title:  "LFI Challenge"
+date:   2020-10-06 11:25:10 +0545
 author: machinexa
-image: /writeups/assets/images/ctflearn_audioedit_homepage.png
+image: /writeups/assets/images/lfichallenge.jpeg
 category: Writeups
 ---
 <br>
 ## Description
-The CTF was about exploit a terribly insane blind SQLi. I started in the morning,  lost my entire day on simple mistakes, and got really frustrated when doing the challenge. The URL was [https://web.ctflearn.com/audioedit/](https://web.ctflearn.com/audioedit/). I received this challenge at night from my friend Jokr.
+The CTF was about exploit a terribly insane blind SQLi. I started doing the CTF in the morning, lost my entire day on simple mistakes, and got really frustrated when doing the challenge. The URL given to me was [https://web.ctflearn.com/audioedit/](https://web.ctflearn.com/audioedit/). I received this challenge at night from my friend Jokr.
 
 ### Finding the Injection
-As its name suggests, it takes `.mp3` file and edits it. So, we have a file upload which leads to an edit page with a unique generated filename. I tried playing with file upload. Eventually, it leads me to nowhere and I assumed file upload was secure. So, what to do then. Well, it took me some time to realize the file was being fetched from the database. The parameter looked like this: [?file=0b07586dffe744a6f2ee824248ed8e61283a3497.mp3](https://web.ctflearn.com/audioedit/edit.php?file=0b07586dffe744a6f2ee824248ed8e61283a3497.mp3)  
+As its name suggests, it takes `.mp3` file and edits it. So, we have a file upload which leads to an edit page with a unique generated filename. I tried playing with file upload. Eventually, it leads me to nowhere and I assumed file upload was secure. So, what to do then. Well, it took me some time to realize the file was being fetched from the database. The parameter looked like this: [file=0b07586dffe744a6f2ee824248ed8e61283a3497.mp3](https://web.ctflearn.com/audioedit/edit.php?file=0b07586dffe744a6f2ee824248ed8e61283a3497.mp3)  
 
 Though jokr said SQLi isn't here still I tried SQL injection and injecting a quote, I got error **" Error fetching audio from DB"** which confirmed the vulnerability.
 
@@ -26,7 +26,7 @@ First, I found the vulnerability by adding ' and " and then confirmed it. `mid3v
 
 ![Burp Request](/writeups/assets/images/ctflearn_audioedit_burprequest.png)
 
-I tried sending some advanced payloads like `' or 1=1 or '` and `' and 1=1 and '` to see how it behaves. Unfortunately, it was throwing error. Each time I tried something new, it gave an error. One more thing to notice is that sending file content with the same content but entirely different filename caused **File Exist** error to be thrown. Mine frustration slowly increased with time, later I found out it was because I directly edited the request from burp suite *(which I should never have).*
+I tried sending some advanced payloads like `' or 1=1 or '` and `' and 1=1 and '` to see how it behaves. Unfortunately, it was throwing error. Each time I tried something new, it gave an error. One more thing to notice is that uploading file with the same content but entirely different filename caused **File Exist** error to be thrown. Mine frustration slowly increased with time, later I found out it was because I directly edited the request from burp suite *(which I should never have).*
 
 I tried to make a python3 script to upload the file and directly give me response which cost me around 1-2 hour. I used http instead of https which caused error. Finally i have a script that does automatically does everything, i just have to type the payload. Here's a small portion: 
 ```python
@@ -53,10 +53,10 @@ while True:
         print(small)
 ``` 
 <br>
-Finally, I found out what I was exploiting was boolean-based blind SQLi. For further confirmation, I did this which I thought would evaluate to true and it did evaluate to true `' and 2=2 or 1=1 or '`
+Finally, I found out what I was exploiting was boolean-based blind SQLi. The injection point was `' or SQL COMMAND or '`. For further confirmation, I did this which I thought would eval to true and did evaluate to true `' and 2=2 or 99=99 or '`.
 
-### Exploiting SQLi Blindly 1
-The insanity starts here. I DM'ed **Blindhero**, another of my nice mentor/friend for some tips on how to get DBMS, tables... He told me to use `SELECT CASE WHEN` which works on Sqlite3. Unfortunately, it didn't work as it was MySQL. He also said about how to get a database, table, and so on. He constantly helped me debug my payload. Now, i started by very basic information gathering payload `' and 2=2 or (SELECT substr(version(),1,1)=5) or '`  which returned 1 and is equivalent to boolean true. 
+### Exploring SQLi Blindly
+The insanity starts here. I DM'ed **Blindhero**, another of my nice mentor/friend for some tips on how to get DBMS, tables... He told me to use `SELECT CASE WHEN` which works on `Sqlite`. Unfortunately, it didn't work as it was `MySQL`. He also said about how to get a database, table, and so on. He constantly helped me debug my payload. Now, i started by very basic information gathering payload `' and 2=2 or (SELECT substr(version(),1,1)=5) or '`  which returned 1 and is equivalent to boolean true. 
 
 Then, moving forward to finding the current database which was not easy but ok. Since it was boolean-based blind doing it by hand would take ages. So, I coded some exploit. Crafting query took time but eventually this `' and 2=2 or (SELECT substr(database(),1,1)='a')` returned true. Here's some of my code with an explanation.
 ```python
@@ -111,8 +111,6 @@ Now, let's run the exploit.
 
 ![Database Audioedit](/writeups/assets/images/ctflearn_audioedit_database.png)
 
-<br>
-### Exploiting SQLi Blindly 2
 Looks nice right? Let's go for a table. I asked him about how to find tables and hinted about information_schema. I created a similar database and table in localhost and came up with this:  
  `(SELECT table_schema, table_name FROM information_schema.tables where table_schema = 'audioedit' and table_name LIKE 'a%' limit 1;)`
 
@@ -135,10 +133,10 @@ First, I thought limit was blocked as every payload used it. Trying simpler payl
 
 ![Random Column name](/writeups/assets/images/ctflearn_audioedit_random.png)
 
-I did some SQL magic in some columns one column interesting column was file. I found out the flag was in file `supersecretflagf1le.mp3`. So, I used the file parameter to reference that file, and unfortunately, I didn't get a flag. 
+I did some SQL magic in column File and found out the flag was in file `supersecretflagf1le.mp3`. So, I used the file parameter to reference that file, and unfortunately, I didn't get a flag. 
 
 ### Audio Editing
-Its the final step, setting visualization to a sonogram and editing some other kind of stuff it was printing lof of stuff. Changing each options and trying all combinatins I finally got the flag embedded in the image. Then I submitted the flag and the feeling of exploiting was awesome.
+Its the final step, setting visualization to a sonogram and editing some other kind of stuff, I got the flag embedded in the image. After submitting I felt quite relaxed.
 
 ![Random Column name](/writeups/assets/images/ctflearn_audioedit_flag.png)
 
