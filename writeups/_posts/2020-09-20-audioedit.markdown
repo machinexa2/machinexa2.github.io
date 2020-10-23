@@ -22,13 +22,13 @@ Trying SQLi for some time again failed me. It wasn't working for some reason (no
 Later he gave a hint that SQLi is in Exif metadata. Also, `exiftool` didn't work for the mp3 file, so I had to find something different. The module `python3-mutagen` is a module for adding tags in mp3 which provided `mid3v2` a perfect cmd line script for the situation.
 
 ### Knowing the Injection
-First, I found the vulnerability by adding ' and " and then confirmed it. `mid3v2 -a "' or '" testing.mp3` is an example of how to inject SQL payload to music tags. I got 0 in author response which indicates condition evaluated to False. Since, running the program, uploading it, and checking the condition is lengthy, I used `Burpsuite` which was my second mistake.  
+First, I found the vulnerability by adding ' and " and then confirmed it. `mid3v2 -a "' or '" testing.mp3` is an example of how to inject SQL payload to music tags. I got 0 in author response which indicates condition evaluated to False. Since, running the program, uploading it, and checking the condition is lengthy, I used `Burpsuite` which was my second mistake. Mine frustration slowly increased with time, later I found out it was because I directly edited the request from burp suite and editing a binary is never good idea, prone to mistakes *(which I should never have).*
 
 ![Burp Request](/writeups/assets/images/ctflearn_audioedit_burprequest.png)
 
-I tried sending some advanced payloads like `' or 1=1 or '` and `' and 1=1 and '` to see how it behaves. Unfortunately, it was throwing error. Each time I tried something new, it gave an error. One more thing to notice is that sending file content with the same content but entirely different filename caused **File Exist** error to be thrown. Mine frustration slowly increased with time, later I found out it was because I directly edited the request from burp suite *(which I should never have).*
+I tried sending some advanced payloads like `' or 1=1 or '` and `' and 1=1 and '` to see how it behaves. Unfortunately, it was throwing error. Each time I tried something new, it gave an error. One more thing to notice is that sending file content with the same content but entirely different filename caused **File Exist** error to be thrown. 
 
-I tried to make a python3 script to upload the file and directly give me response which cost me around 1-2 hour. I used http instead of https which caused error. Finally i have a script that does automatically does everything, i just have to type the payload. Here's a small portion: 
+I tried to make a python3 script to upload the file and directly give me response which cost me around 1-2 hour. Finally i have a script that does automatically does everything, i just have to type the payload. Here's a small portion: 
 ```python
 url = "https://web.ctflearn.com/audioedit/submit_upload.php"
 while True:
