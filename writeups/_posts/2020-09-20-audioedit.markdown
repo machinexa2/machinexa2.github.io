@@ -28,7 +28,7 @@ First, I found the vulnerability by adding ' and " and then confirmed it. `mid3v
 
 I tried sending some advanced payloads like `' or 1=1 or '` and `' and 1=1 and '` to see how it behaves. Unfortunately, it was throwing error. Each time I tried something new, it gave an error. One more thing to notice is that sending file content with the same content but entirely different filename caused **File Exist** error to be thrown. 
 
-I tried to make a python3 script to upload the file and directly give me response which cost me around 1-2 hour. Finally i have a script that does automatically does everything, i just have to type the payload. Here's a small portion: 
+I tried to make a python3 script to upload the file and directly give me response which cost me around 1-2 hour. Finally, I have a script that does automatically does everything, I just have to type the payload. Here's a small portion: 
 ```python
 url = "https://web.ctflearn.com/audioedit/submit_upload.php"
 while True:
@@ -56,7 +56,7 @@ while True:
 Finally, I found out what I was exploiting was boolean-based blind SQLi. For further confirmation, I did this which I thought would evaluate to true and it did evaluate to true `' and 2=2 or 1=1 or '`
 
 ### Exploiting SQLi Blindly 1
-The insanity starts here. I DM'ed **Blindhero**, another of my nice mentor/friend for some tips on how to get DBMS, tables... He told me to use `SELECT CASE WHEN` which works on Sqlite3. Unfortunately, it didn't work as it was MySQL. He also said about how to get a database, table, and so on. He constantly helped me debug my payload. Now, i started by very basic information gathering payload `' and 2=2 or (SELECT substr(version(),1,1)=5) or '`  which returned 1 and is equivalent to boolean true. 
+The insanity starts here. I DM'ed **Blindhero**, another of my nice mentor/friend for some tips on how to get DBMS, tables... He told me to use `SELECT CASE WHEN` which works on Sqlite3. Unfortunately, it didn't work as it was MySQL. He also said about how to get a database, table, and so on. He constantly helped me debug my payload. Now, I started by very basic information gathering payload `' and 2=2 or (SELECT substr(version(),1,1)=5) or '`  which returned 1 and is equivalent to boolean true. 
 
 Then, moving forward to finding the current database which was not easy but ok. Since it was boolean-based blind doing it by hand would take ages. So, I coded some exploit. Crafting query took time but eventually this `' and 2=2 or (SELECT substr(database(),1,1)='a')` returned true. Here's some of my code with an explanation.
 ```python
@@ -124,21 +124,21 @@ I also modified the `setcmd()` function slightly and exploiting gives me audioed
 
 `' and 2=2 or (SELECT substr(count(*),1,1) FROM information_schema.columns WHERE table_name = 'audioedit')=1 or '`  
 <br>
-So, after running script i know number of columns are 5, now what. After writing another payload to find column it errored out no matter what i used. Now, this part was very tough to debug. I just went mad trying to find out what was the problem. It took about 3 hours to find what was the problem. I crafted about 4-5 payloads, none of them were working.
+So, after running script I know number of columns are 5, now what? After writing another payload to find column it errored out no matter what I used. Now, this part was very tough to debug. I just went mad trying to find out what was the problem. It took about 3 hours to find what was the problem. I crafted about 4-5 payloads, none of them were working.
 ```sql
 ' and 2=2 or (SELECT substr(column_name,1,1) FROM information_schema.columns where table_name='audioedit' limit 1 OFFSET 1)='a' or '
 ' and 2=2 or (SELECT((SELECT count(*) FROM information_schema.columns WHERE table_name = 'audioedit' and column_name LIKE 'xx%')=1)) or '
 ' and 2=2 or (select substr(column_name,1,1)='y' from information_schema.columns where table_name = 'audioedit' limit 1,1) or '
 ```
 <br>
-First, I thought limit was blocked as every payload used it. Trying simpler payloads like `' and 2=2 or (select version() like '5%' limit 1) or '` did work. I got to a point when the payload was large, then I added ()  which caused the error. Oh, so spaces are the problem. Why the hell did I use 2=2. Shit. Also, i reduced `get_random_string()` to length of 2. Finally, it worked like a charm and got the first column name, then second, then third... 
+First, I thought limit was blocked as every payload used it. Trying simpler payloads like `' and 2=2 or (select version() like '5%' limit 1) or '` did work. I got to a point when the payload was large, then for debuggin I added ()  which caused the error. Oh, so I figured out spaces are the problem. Why did I use 2=2 in the first place.. Also, I reduced `get_random_string()` to length of 2. Finally, it worked like a charm and got the first column name, then second, then third... 
 
 ![Random Column name](/writeups/assets/images/ctflearn_audioedit_random.png)
 
-I did some SQL magic in some columns one column interesting column was file. I found out the flag was in file `supersecretflagf1le.mp3`. So, I used the file parameter to reference that file, and unfortunately, I didn't get a flag. 
+I did some SQL magic in some columns. There were multiple columns and the one that caught my attention was file column. The column had a row with value `supersecretflagf1le.mp3` which hints the flag. So, I used the file parameter to reference that file, and unfortunately, I didn't get a flag. I was still stuck and frustated to point where I felt very sick. 
 
 ### Audio Editing
-Its the final step, setting visualization to a sonogram and editing some other kind of stuff it was printing lof of stuff. Changing each options and trying all combinatins I finally got the flag embedded in the image. Then I submitted the flag and the feeling of exploiting was awesome.
+Its the final step, setting visualization to a sonogram and editing some other kind of stuff it was printing lof of stuff. I was thinking where could be the flag hidden in that file. After changing each options and trying all combinatins I finally got the flag embedded in the image. Then I submitted it and the feeling of exploiting was awesome.
 
 ![Random Column name](/writeups/assets/images/ctflearn_audioedit_flag.png)
 
