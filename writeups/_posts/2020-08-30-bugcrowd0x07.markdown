@@ -3,7 +3,7 @@ layout: post
 title:  "Bugcrowd 0x07 Levelup CTF"
 date:   2020-08-30 16:25:10 +0545
 author: machinexa
-image: /writeups/assets/images/bugcrowd0x07.jpeg
+image: /writeups/assets/images/bugcrowd0x07.jpg
 category: Writeups
 ---
 <br>
