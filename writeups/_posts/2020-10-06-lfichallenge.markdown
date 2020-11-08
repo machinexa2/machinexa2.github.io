@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "LFI Challenge Writeup"
+title:  "BugPoC's LFI Challenge Writeup"
 date:   2020-10-06 11:25:10 +0545
 author: machinexa
 image: /writeups/assets/images/lfichallenge.jpeg

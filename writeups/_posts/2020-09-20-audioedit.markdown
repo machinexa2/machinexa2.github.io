@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Audioedit Writeup: CTFLearn"
+title:  "CTFLearn's Audioedit Writeup"
 date:   2020-09-18 16:25:10 +0545
 author: machinexa
 image: /writeups/assets/images/ctflearn_audioedit_homepage.png
