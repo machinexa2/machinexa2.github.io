@@ -95,6 +95,5 @@ The challenge was awesome, and I loved it. I also learned a lot of new things. A
 * BugPoC and Amazon for hosting and sponsoring the challenge.
 * LiveOverflow for an awesome window.name trick
 * Portswigger for awesome DOM Clobbering article
-* Naina for teaching me about weird javascript techniques.
 
 By the way, if you haven't watched [Liveoverflow's video](https://www.youtube.com/watch?v=L1RvK1443Yw&t=307s), go watch it now.
