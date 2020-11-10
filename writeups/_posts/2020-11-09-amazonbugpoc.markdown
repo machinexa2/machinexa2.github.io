@@ -67,7 +67,7 @@ Injecting the `<base>` tag will cause the script to be fetched from an attacker-
 
 It was an integrity error which is related to SRI (Sub Resource Integrity), which protects against compromised script sources. In nutshell, it's a hash of the entire javascript file. There was no way I could generate the same hash, and a collision was impossible as the browser only supports collision resistant hashes. However, if I could change `window.fileIntegrity.value`, maybe I could set the value to the hash of my file.  
 
-Searching more and more, I found out id and value attribute of `<input>` directly affects javascript variables. So, I used the following script: 
+The id and value attribute of `<input>` directly affects javascript variables. Its a well known method of DOM Clobbering commonly used in CTFs. So, I used the following script: 
 ```html
 <script>
 window.name = "iframe";
